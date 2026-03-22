@@ -7,7 +7,7 @@
 
 import UIKit
 
-enum MenuItem : Int, CaseIterable {
+enum AppTab: Int, CaseIterable {
     case qrCodeScanner = 0
     case history = 1
     case createQRCode = 2
@@ -28,22 +28,22 @@ enum MenuItem : Int, CaseIterable {
             return "Settings"
         }
     }
-    
+
     func icon() -> UIImage? {
         switch self {
         case .qrCodeScanner:
-            return UIImage(named: "")
+            return UIImage(systemName: "qrcode.viewfinder")
         case .history:
-            return UIImage(named: "")
+            return UIImage(systemName: "clock.arrow.circlepath")
         case .createQRCode:
-            return UIImage(named: "")
+            return UIImage(systemName: "qrcode")
         case .favorite:
-            return UIImage(named: "")
+            return UIImage(systemName: "heart.fill")
         case .settings:
-            return UIImage(named: "")
+            return UIImage(systemName: "gearshape.fill")
         }
     }
-    
+
     func viewController() -> UIViewController {
         switch self {
         case .qrCodeScanner:

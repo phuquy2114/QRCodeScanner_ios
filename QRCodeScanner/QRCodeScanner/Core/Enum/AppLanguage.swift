@@ -48,7 +48,7 @@ public final class LanguageManager: @unchecked Sendable {
     }
     
     @MainActor
-    func reloadAppToApplyLanguage(viewController: ViewController) {
+    func reloadAppToApplyLanguage(viewController: UIViewController) {
         // 1. Lấy cửa sổ (Window) hiện tại của app
         guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
               let window = windowScene.windows.first else { return }
@@ -63,8 +63,3 @@ public final class LanguageManager: @unchecked Sendable {
     }
 }
 
-// MARK: - Notifications
-public extension Notification.Name {
-    // LanguageManager.shared.currentLanguage = .english
-    static let languageDidChange = Notification.Name("app_language_did_change")
-}
