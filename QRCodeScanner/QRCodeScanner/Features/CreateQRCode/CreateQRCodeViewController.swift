@@ -1,0 +1,32 @@
+//
+//  CreateQRCodeViewController.swift
+//  QRCodeScanner
+//
+//  Created by Ngo Nghia on 20/3/26.
+//
+
+import Combine
+import UIKit
+
+class CreateQRCodeViewController: BaseViewController {
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+
+        // Do any additional setup after loading the view.
+    }
+
+    override func bindData() {
+
+    }
+    /*
+    // MARK: - Navigation
+    
+    // In a storyboard-based application, you will often want to do a little preparation before navigation
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        // Get the new view controller using segue.destination.
+        // Pass the selected object to the new view controller.
+    }
+    */
+
+}

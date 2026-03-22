@@ -1,0 +1,11 @@
+/* 
+  Localizable.strings
+  QRCodeScanner
+
+  Created by Ngo Nghia on 20/3/26.
+  
+*/
+
+"cancel_button" = "Cancel";
+"confirm_button" = "Confirm";
+"error_title" = "Error";
