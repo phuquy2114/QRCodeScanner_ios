@@ -16,11 +16,16 @@ enum AppThemeColor: String, CaseIterable, Codable {
 
     func color() -> UIColor {
         switch self {
-        case .yellow: return UIColor(hex: "#FFBF1A")
-        case .blue: return UIColor(hex: "#3B8BFF")
-        case .green: return UIColor(hex: "#2ECC71")
-        case .orange: return UIColor(hex: "#FF6B35")
-        case .red: return UIColor(hex: "#FF3B30")
+        case .yellow:
+            return UIColor(hex: "#FFBF1A")
+        case .blue:
+            return UIColor(hex: "#3B8BFF")
+        case .green:
+            return UIColor(hex: "#2ECC71")
+        case .orange:
+            return UIColor(hex: "#FF6B35")
+        case .red:
+            return UIColor(hex: "#FF3B30")
         }
     }
 

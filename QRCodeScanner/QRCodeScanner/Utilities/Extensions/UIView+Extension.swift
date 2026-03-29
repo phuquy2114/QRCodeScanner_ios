@@ -36,6 +36,23 @@ extension UIView {
             else { self?.tintColor = color }
         }
     }
+    
+    func observerNewTheme(_ work: @escaping(_ color: UIColor) -> Void) {
+        NotificationCenter.default.addObserver(
+            forName: .themeDidChange,
+            object: nil,
+            queue: .main
+        ) { notification in
+            guard let color = notification.object as? UIColor else {
+                return
+            }
+            work(color)
+        }
+    }
+    
+    func changeConstraints() {
+        self.translatesAutoresizingMaskIntoConstraints = false
+    }
 }
 
 extension UILabel {

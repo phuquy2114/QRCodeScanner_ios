@@ -8,10 +8,10 @@
 import UIKit
 
 final class MainTabBarController: UITabBarController {
-    
+
     private let tabBarHeight: CGFloat = 70
     private let tabBarMargin: CGFloat = 16  // khoảng cách 2 bên so với màn hình
-    private let tabBarBottom: CGFloat = 12  // khoảng cách so với safe area bottom
+    private let tabBarBottom: CGFloat = 8  // khoảng cách so với safe area bottom
     private let animationDuration: TimeInterval = 0.28
     private let tabBarBg = UIColor(white: 0.13, alpha: 1)  // dark charcoal
 
@@ -35,25 +35,16 @@ final class MainTabBarController: UITabBarController {
     private func setupViewControllers() {
         let vcs: [UIViewController] = AppTab.allCases.map { tab in
             let vc = placeholderVC(for: tab)
-            return UINavigationController(rootViewController: vc)
+            let navigation = UINavigationController(rootViewController: vc)
+            navigation.setNavigationBarHidden(true, animated: true)
+            return navigation
         }
         setViewControllers(vcs, animated: false)
     }
 
     private func placeholderVC(for tab: AppTab) -> UIViewController {
-        let vc = tab.viewController()
-        vc.view.backgroundColor = UIColor(white: 0.08, alpha: 1)
-        let label = UILabel()
-        label.text = tab.title()
-        label.textColor = .white
-        label.font = .boldSystemFont(ofSize: 28)
-        label.translatesAutoresizingMaskIntoConstraints = false
-        vc.view.addSubview(label)
-        NSLayoutConstraint.activate([
-            label.centerXAnchor.constraint(equalTo: vc.view.centerXAnchor),
-            label.centerYAnchor.constraint(equalTo: vc.view.centerYAnchor),
-        ])
-        return vc
+        // backgroundColor = UIColor(white: 0.08, alpha: 1)
+        return tab.viewController()
     }
 
     private func setupCustomTabBar() {
@@ -68,6 +59,8 @@ final class MainTabBarController: UITabBarController {
         customTabBar.layer.borderWidth = 1
         customTabBar.layer.borderColor = ThemeManager.shared.themeColor.cgColor
         view.addSubview(customTabBar)
+        
+        self.additionalSafeAreaInsets.bottom = self.tabBarHeight + self.tabBarBottom
 
         // Selection pill (inside)
         selectionPill.clipsToBounds = true
@@ -107,6 +100,8 @@ final class MainTabBarController: UITabBarController {
             self.applyTheme(newColor)
         }
     }
+    
+    
 
     private func applyTheme(_ color: UIColor) {
         UIView.animate(withDuration: 0.3) {
@@ -120,7 +115,7 @@ final class MainTabBarController: UITabBarController {
     }
 
     private func layoutTabBar() {
-        let safeBottom = view.safeAreaInsets.bottom
+        let safeBottom = view.window?.safeAreaInsets.bottom ?? 0
         let width = view.bounds.width - self.tabBarMargin * 2
         let height = self.tabBarHeight
         let y = view.bounds.height - safeBottom - height - self.tabBarBottom

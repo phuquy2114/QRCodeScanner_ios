@@ -1,37 +1,31 @@
 //
-//  BaseTableViewCell.swift
+//  BaseCollectionViewCell.swift
 //  QRCodeScanner
 //
-//  Created by Ngo Nghia on 19/3/26.
+//  Created by Ngo Nghia on 27/3/26.
 //
 
 import UIKit
-/// Base class cho tất cả custom UITableViewCell
-/// - Sử dụng trong MVVM: cell.configure(with: viewModel.item)
-class BaseTableViewCell: UITableViewCell {
-    
+open class BaseCollectionViewCell: UICollectionViewCell {
     // MARK: - Properties
     /// Reuse identifier chuẩn (tự động lấy tên class)
-    class var identifier: String {
+    open class var identifier: String {
         return String(describing: self)
     }
     
     /// Nếu dùng XIB/Storyboard, override để trả về UINib
-    class var nib: UINib? {
+    open class var nib: UINib? {
         return nil // override ở cell con nếu cần: UINib(nibName: identifier, bundle: nil)
     }
     
     // MARK: - Initialization
-    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
-        super.init(style: style, reuseIdentifier: reuseIdentifier)
-        setupUI()
-        setupConstraints()
+    public required init?(coder: NSCoder) {
+        super.init(coder: coder)
+
     }
     
-    required init?(coder: NSCoder) {
-        super.init(coder: coder)
-        setupUI()
-        setupConstraints()
+    public override init(frame: CGRect) {
+        super.init(frame: frame)
     }
     
     // MARK: - Setup (gọi 1 lần khi init)
@@ -61,7 +55,7 @@ class BaseTableViewCell: UITableViewCell {
 //    }
     
     // MARK: - Reuse
-    override func prepareForReuse() {
+    open override func prepareForReuse() {
         super.prepareForReuse()
         // Reset trạng thái để tránh data cũ leak
         // Ví dụ:
@@ -73,8 +67,7 @@ class BaseTableViewCell: UITableViewCell {
 
 // MARK: - Protocol hỗ trợ (optional, rất tiện cho MVVM)
 /// Protocol để ViewModel tự configure cell
-protocol CellConfigurable {
-    associatedtype Cell: UITableViewCell
+protocol CollectionCellConfigurable {
+    associatedtype Cell: UICollectionViewCell
     func configure(cell: Cell)
 }
-

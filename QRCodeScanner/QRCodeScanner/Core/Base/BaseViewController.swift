@@ -38,6 +38,9 @@ open class BaseViewController: UIViewController {
 
     /// Lưu Task keyboard để cancel khi view disappear
     private var keyboardTask: Task<Void, Never>?
+    
+    /// Lưu Task system (Theme, Language) để cancel khi deinit
+    private var systemObserversTask: Task<Void, Never>?
 
     /// Safe area insets helper
     var safeTop: CGFloat { view.safeAreaInsets.top }
@@ -65,13 +68,13 @@ open class BaseViewController: UIViewController {
 
     deinit {
         keyboardTask?.cancel()
+        systemObserversTask?.cancel()
         print("✅ Deinit: \(String(describing: type(of: self)))")
     }
 
     // MARK: - Setup Base
 
     private func setupBase() {
-        view.backgroundColor = .systemBackground
         if let windowScene = UIApplication.shared.connectedScenes.first
             as? UIWindowScene,
             let window = windowScene.windows.first
@@ -80,25 +83,67 @@ open class BaseViewController: UIViewController {
         }
         // Cài đặt text lần đầu tiên
         setupLocalizedTexts()
-        
-        // Lắng nghe sự kiện đổi ngôn ngữ
-        NotificationCenter.default.addObserver(self, selector: #selector(handleLanguageChanged), name: .languageDidChange, object: nil)
+
+        // Lắng nghe sự kiện hệ thống (Theme, Language) bằng AsyncSequence
+        startSystemObservers()
     }
 
-    @objc private func handleLanguageChanged() {
+    private func startSystemObservers() {
+        systemObserversTask = Task { [weak self] in
+            guard let self else { return }
+            await withTaskGroup(of: Void.self) { group in
+                
+                // 1. Lắng nghe đổi ngôn ngữ
+                group.addTask { [weak self] in
+                    guard let self else { return }
+                    for await _ in await NotificationCenter.default
+                        .notifications(named: .languageDidChange) {
+                        guard !Task.isCancelled else { break }
+                        await self.handleLanguageChanged()
+                    }
+                }
+                
+                // 2. Lắng nghe đổi theme
+                group.addTask { [weak self] in
+                    guard let self else { return }
+                    for await noti in await NotificationCenter.default
+                        .notifications(named: .themeDidChange) {
+                        guard !Task.isCancelled else { break }
+                        await self.handleThemeChanged(noti: noti)
+                    }
+                }
+            }
+        }
+    }
+
+    private func handleLanguageChanged() {
         // Hàm này sẽ tự động chạy trên TẤT CẢ các màn hình đang sống khi user đổi ngôn ngữ
         setupLocalizedTexts()
     }
     
+    private func handleThemeChanged(noti: Notification) {
+        // Hàm này sẽ tự động chạy trên TẤT CẢ các màn hình đang sống khi user đổi theme
+        guard let color = noti.object as? UIColor else { return }
+        self.applyNewTheme(color: color)
+    }
+
     // MARK: - Override Points
 
     open func setupUI() {}
     open func bindData() {}
     open func setupActions() {}
-    
+
     /// Class con (HomeVC, SettingsVC...) sẽ override hàm này để gán text cho UI
     open func setupLocalizedTexts() {
         // Ví dụ: title = "screen_title".localized
+    }
+    
+    open func applyNewTheme(color: UIColor) {
+        
+    }
+    
+    open func setBackgroundColor(color: UIColor? = nil) {
+        view.backgroundColor = color ?? .backgroundColor
     }
 }
 
@@ -260,7 +305,7 @@ extension BaseViewController {
         cancelTitle: String? = nil
     ) async -> Int? {
         let finalCancelTitle = cancelTitle ?? "cancel_button".localized
-        
+
         return await withCheckedContinuation { continuation in
             let sheet = UIAlertController(
                 title: title,
@@ -367,11 +412,11 @@ extension BaseViewController {
     /// Alert hướng dẫn Settings khi camera bị từ chối
     func showCameraPermissionDeniedAlert() async {
         let confirmed = await showConfirmAlert(
-            title: "Quyền Camera bị từ chối",
+            title: "camera_permission_denied".localized,
             message:
-                "Ứng dụng cần quyền truy cập camera để quét QR. Vui lòng vào Cài đặt để cấp quyền.",
-            confirmTitle: "Mở Cài đặt",
-            cancelTitle: "Để sau"
+                "content_message_requesting_camera_access".localized,
+            confirmTitle: "open_settings".localized,
+            cancelTitle: "cancel_button".localized
         )
         if confirmed, let url = URL(string: UIApplication.openSettingsURLString)
         {
@@ -546,7 +591,7 @@ extension BaseViewController {
     var screenWidth: CGFloat { UIScreen.current.bounds.width }
     var screenHeight: CGFloat { UIScreen.current.bounds.height }
 
-    open override var preferredStatusBarStyle: UIStatusBarStyle { .default }
+    public override var preferredStatusBarStyle: UIStatusBarStyle { .default }
 
     var isSimulator: Bool {
         #if targetEnvironment(simulator)
@@ -585,10 +630,11 @@ extension BaseViewController {
 
 extension BaseViewController {
 
-    func copyToClipboard(_ text: String, toastMessage: String = "Đã sao chép!") {
+    func copyToClipboard(_ text: String, toastMessage: String? = nil) {
+        let newToastMessage = toastMessage ?? "copied".localized
         UIPasteboard.general.string = text
         haptic(.light)
-        showToastAsync(toastMessage)
+        showToastAsync(newToastMessage)
     }
 
     /// Share — await đến khi share sheet đóng
@@ -617,7 +663,10 @@ extension BaseViewController {
     /// Open URL (async)
     func openURL(_ urlString: String) async {
         guard let url = URL(string: urlString) else {
-            await showAlert(title: "error_title".localized, message: "URL không hợp lệ")
+            await showAlert(
+                title: "error_title".localized,
+                message: "invalid_URL".localized
+            )
             return
         }
 
@@ -629,9 +678,17 @@ extension BaseViewController {
 
 extension BaseViewController {
 
-    @MainActor
-    func onMain(_ block: @escaping () -> Void) {
-        block()
+//    @MainActor
+//    func onMain(_ block: @escaping () -> Void) {
+//        block()
+//    }
+    
+    func onMain(_ work: @escaping @MainActor () -> Void) {
+        Task {
+            await MainActor.run {
+                work()
+            }
+        }
     }
 
     /// Chạy task nặng ở background, kết quả tự động trả về @MainActor
@@ -645,11 +702,12 @@ extension BaseViewController {
         }.value
     }
 
-    func onBackground(
+    // Chạy task nặng ở background, không cần trả về kiểu dữ liệu, hàm Void
+    static func onBackground(
         priority: TaskPriority = .userInitiated,
-        operation: @escaping () async -> Void
+        operation: @Sendable @escaping () async -> Void
     ) {
-        Task(priority: priority) {
+        Task.detached(priority: priority) {
             await operation()
         }
     }

@@ -8,25 +8,32 @@
 import Foundation
 
 open class AppUtils {
-    
-    @MainActor
-    static func onMain(_ block: @escaping () -> Void) {
-        block()
+
+    static func onMain(_ work: @escaping @MainActor () -> Void) {
+        Task {
+            await MainActor.run {
+                work()
+            }
+        }
     }
-    
+
     /// Chạy task nặng ở background, kết quả tự động trả về @MainActor
     /// Ví dụ: let result = try await runInBackground { try parseJSON(data) }
-    static func runInBackground<T: Sendable>(_ priority: TaskPriority = .userInitiated, _ work: @Sendable @escaping () throws -> T) async throws -> T {
+    static func runInBackground<T: Sendable>(
+        _ priority: TaskPriority = .userInitiated,
+        _ work: @Sendable @escaping () throws -> T
+    ) async throws -> T {
         try await Task.detached(priority: priority) {
             try work()
         }.value
     }
-    
+
+    // Chạy task nặng ở background, không cần trả về kiểu dữ liệu, hàm Void
     static func onBackground(
         priority: TaskPriority = .userInitiated,
-        operation: @escaping () async -> Void
+        operation: @Sendable @escaping () async -> Void
     ) {
-        Task(priority: priority) {
+        Task.detached(priority: priority) {
             await operation()
         }
     }
@@ -36,7 +43,7 @@ open class AppUtils {
     static func delay(seconds: TimeInterval) async {
         try? await Task.sleep(for: .seconds(seconds))
     }
-    
+
     static func parallel(_ tasks: [() async -> Void]) async {
         await withTaskGroup(of: Void.self) { group in
             for task in tasks {
@@ -45,4 +52,3 @@ open class AppUtils {
         }
     }
 }
-

@@ -19,7 +19,7 @@ final class ThemeManager {
         newTheme = .yellow
         currentTheme = .yellow
         
-        var theme = self.load()
+        let theme = self.load()
         newTheme = theme
         currentTheme = theme
     }
@@ -35,7 +35,6 @@ final class ThemeManager {
         }
     }
 
-    // backing store để tránh didSet loop
     private var newTheme: AppThemeColor {
         didSet { currentTheme = newTheme }
     }
@@ -84,7 +83,7 @@ final class ThemeManager {
 
     // MARK: - Persistence
 
-    private let storageKey = "app_theme_color"
+    private let storageKey = Constants.storageKeyAppThemeColor
 
     private func save(_ theme: AppThemeColor) {
         UserDefaults.standard.set(theme.rawValue, forKey: storageKey)

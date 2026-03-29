@@ -4,6 +4,6 @@
 //
 //  Created by Ngo Nghia on 20/3/26.
 //
-class HistoryViewModel {
+class HistoryViewModel: BaseViewModel {
     
 }

@@ -6,10 +6,8 @@
 //  Swift Concurrency — iOS 15+, Swift 5.7+
 //
 
-import Foundation
 import Combine
-
-
+import Foundation
 
 // MARK: - BaseViewModel
 
@@ -75,7 +73,10 @@ extension BaseViewModel {
     }
 
     /// Set success message (tự clear sau `autoClearAfter` giây)
-    func setSuccess(_ message: String? = nil, autoClearAfter seconds: TimeInterval = 3) {
+    func setSuccess(
+        _ message: String? = nil,
+        autoClearAfter seconds: TimeInterval = 3
+    ) {
         setState(.success)
         successMessage = message
         guard seconds > 0, message != nil else { return }
@@ -204,9 +205,11 @@ extension BaseViewModel {
 
     /// Debounce một action (ví dụ: search)
     /// Ví dụ: debounce(key: "search", delay: 0.4) { await self.search(query) }
-    func debounce(key: String = "debounce",
-                  delay: TimeInterval = 0.5,
-                  action: @escaping () async -> Void) {
+    func debounce(
+        key: String = "debounce",
+        delay: TimeInterval = 0.5,
+        action: @escaping () async -> Void
+    ) {
         cancelTask(key: key)
         activeTasks[key] = Task {
             try? await Task.sleep(for: .seconds(delay))
@@ -223,8 +226,10 @@ extension BaseViewModel {
 
     /// Lắng nghe @Published từ ViewModel khác và map sang async
     /// Ví dụ: observe($otherVM.state) { state in ... }
-    func observe<T>(_ publisher: Published<T>.Publisher,
-                    handler: @escaping (T) -> Void) {
+    func observe<T>(
+        _ publisher: Published<T>.Publisher,
+        handler: @escaping (T) -> Void
+    ) {
         publisher
             .receive(on: RunLoop.main)
             .sink { handler($0) }
@@ -263,15 +268,18 @@ public struct ValidationRule {
     static func nonEmpty(_ value: String, fieldName: String) -> ValidationRule {
         ValidationRule {
             value.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-                ? "\(fieldName) không được để trống" : nil
+                ? "\(fieldName) \("It_cannot_be_left_blank".localized)" : nil
         }
     }
 
     /// Độ dài tối thiểu
-    static func minLength(_ value: String, min: Int, fieldName: String) -> ValidationRule {
+    static func minLength(_ value: String, min: Int, fieldName: String)
+        -> ValidationRule
+    {
         ValidationRule {
             value.count < min
-                ? "\(fieldName) phải có ít nhất \(min) ký tự" : nil
+                ? "\(fieldName) \("It_must_have_at_least".localized) \(min) \("characters".localized)"
+                : nil
         }
     }
 
@@ -280,7 +288,7 @@ public struct ValidationRule {
         ValidationRule {
             let regex = #"^[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$"#
             return value.range(of: regex, options: .regularExpression) == nil
-                ? "Email không hợp lệ" : nil
+                ? "Invalid_email".localized : nil
         }
     }
 

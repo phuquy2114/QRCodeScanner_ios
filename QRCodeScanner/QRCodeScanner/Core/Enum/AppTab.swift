@@ -47,7 +47,7 @@ enum AppTab: Int, CaseIterable {
     func viewController() -> UIViewController {
         switch self {
         case .qrCodeScanner:
-            return QRCodeScannerViewController()
+            return ScanViewController()
         case .history:
             return HistoryViewController()
         case .createQRCode:

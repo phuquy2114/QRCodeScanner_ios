@@ -5,6 +5,6 @@
 //  Created by Ngo Nghia on 20/3/26.
 //
 
-class FavoriteViewViewModel {
+class FavoriteViewViewModel: BaseViewModel {
     
 }

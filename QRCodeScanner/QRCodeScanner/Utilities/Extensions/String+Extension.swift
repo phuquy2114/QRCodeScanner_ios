@@ -22,4 +22,9 @@ public extension String {
         return String(format: self.localized, arguments: arguments)
     }
     
+    func capitalizingFirstLetter() -> String {
+        return prefix(1).uppercased() + self.dropFirst()
+    }
+
+
 }
