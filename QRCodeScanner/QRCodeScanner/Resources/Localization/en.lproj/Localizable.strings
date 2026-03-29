@@ -9,7 +9,7 @@
 "cancel_button" = "Cancel";
 "confirm_button" = "Confirm";
 "error_title" = "Error";
-"camera_permission_denied." = "Camera permission denied.";
+"camera_permission_denied" = "Camera permission denied.";
 "open_settings" = "Open Settings";
 "content_message_requesting_camera_access" = "The app needs camera access to scan QR codes. Please go to Settings to grant permission.";
 "copied" = "Copied!";

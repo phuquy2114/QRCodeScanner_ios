@@ -9,7 +9,7 @@
 "cancel_button" = "Hủy";
 "confirm_button" = "Xác nhận";
 "error_title" = "Lỗi";
-"camera_permission_denied" = "Quyền Camera bị từ chối";
+"camera_permission_denied" = "Quyền Camera bị từ chối.";
 "open_settings" = "Mở cài đặt";
 "content_message_requesting_camera_access" = "Ứng dụng cần quyền truy cập camera để quét QR. Vui lòng vào Cài đặt để cấp quyền.";
 "copied" = "Đã sao chép!";

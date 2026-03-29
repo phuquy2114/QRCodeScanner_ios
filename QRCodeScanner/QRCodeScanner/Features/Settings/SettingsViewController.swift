@@ -114,8 +114,11 @@ final class SettingsViewController: BaseViewController {
     private func buildSoundSection() {
         let card = makeCard()
         let titleLabel = makeSectionTitle("Sound")
-        
         card.addArrangedSubview(titleLabel)
+        
+        let view = UIView()
+        view.heightAnchor.constraint(equalToConstant: 12).isActive = true
+        card.addArrangedSubview(view)
 
         let rows: [(String, UISwitch)] = [
             ("Vibrate", vibrateToggle),
@@ -143,27 +146,29 @@ final class SettingsViewController: BaseViewController {
         view.heightAnchor.constraint(equalToConstant: 12).isActive = true
         card.addArrangedSubview(view)
         
-        let rows: [(String, String?)] = [
-            ("FAQ", nil),
-            ("Feedback", "Report bugs and tell us what to improve"),
-            ("Rate Us", "Your best reward to us."),
-            ("Share", "Shara app with others"),
-            ("Privacy Policy", nil),
-            ("Terms of use", nil),
+        typealias HelpTuple = (title: String, desc: String?, index: Int)
+        
+        let rows: [HelpTuple] = [
+            (title: "FAQ", desc: nil, 1),
+            (title: "Feedback", desc: "Report bugs and tell us what to improve", 2),
+            (title: "Rate Us", desc: "Your best reward to us.", 3),
+            (title: "Share", desc: "Share app with others", 4),
+            (title: "Privacy Policy", desc: nil, 5),
+            (title: "Terms of use", desc: nil, 6),
         ]
         
-        rows.forEach { title, description in
-            let row = makeHelpRow(title, description)
+        rows.forEach { (title: String, desc: String?, index: Int) in
+            let row = makeHelpRow(title, desc, index)
             card.addArrangedSubview(row)
         }
-
+        
     }
     
     //MARK: - Version Section
     
     private func buildVersionSection() {
         let card = makeCard()
-        let title = makeSectionTitle(self.version)
+        let title = makeSectionTitle("Version \(self.version)")
         card.addArrangedSubview(title)
         
         let view = UIView()
@@ -232,7 +237,6 @@ final class SettingsViewController: BaseViewController {
 
     private func makeCard() -> UIStackView {
         let container = UIView()
-//        container.backgroundColor = UIColor(white: 0.15, alpha: 1)
         container.backgroundColor = .backgroundColor
         container.layer.cornerRadius = 16
         container.clipsToBounds = true
@@ -278,14 +282,6 @@ final class SettingsViewController: BaseViewController {
     private func makeToggle() -> UISwitch {
         let sw = UISwitch()
         sw.onTintColor = ThemeManager.shared.themeColor
-        // reactive khi theme đổi
-        NotificationCenter.default.addObserver(
-            forName: .themeDidChange,
-            object: nil,
-            queue: .main
-        ) { [weak sw] n in
-            sw?.onTintColor = n.object as? UIColor
-        }
         return sw
     }
 
@@ -316,25 +312,38 @@ final class SettingsViewController: BaseViewController {
         divider.translatesAutoresizingMaskIntoConstraints = false
         divider.heightAnchor.constraint(equalToConstant: 1).isActive = true
         container.addSubview(divider)
+        
         NSLayoutConstraint.activate([
             divider.leadingAnchor.constraint(equalTo: container.leadingAnchor),
             divider.trailingAnchor.constraint(
                 equalTo: container.trailingAnchor
             ),
-            divider.bottomAnchor.constraint(equalTo: container.bottomAnchor),
+            divider.topAnchor.constraint(equalTo: container.topAnchor),
         ])
+        
         return container
     }
 
-    private func makeHelpRow(_ title: String, _ description: String? = nil) -> UIView {
+    private func makeHelpRow(_ title: String, _ desc: String?, _ index: Int) -> UIView {
+        
+        let onTap = UITapGestureRecognizer(
+            target: self,
+            action: #selector(onTapHelpRow(_:))
+        )
+        
         let container = UIView()
-        let height: CGFloat = description == nil ? 48 : 60
+        let height: CGFloat = desc == nil ? 48 : 60
         container.heightAnchor.constraint(equalToConstant: height).isActive = true
+        container.tag = index
+        container.isUserInteractionEnabled = true
+        container.addGestureRecognizer(onTap)
+        container.restorationIdentifier = title
 
         let divider = UIView()
         divider.backgroundColor = UIColor(white: 1, alpha: 0.1)
         divider.translatesAutoresizingMaskIntoConstraints = false
         divider.heightAnchor.constraint(equalToConstant: 1).isActive = true
+        
         container.addSubview(divider)
         
         NSLayoutConstraint.activate([
@@ -350,34 +359,39 @@ final class SettingsViewController: BaseViewController {
         titleLabel.font = .boldSystemFont(ofSize: 18)
         titleLabel.textColor = .white
         titleLabel.changeConstraints()
+        
         container.addSubview(titleLabel)
         
-        if description == nil {
+        if desc == nil {
             NSLayoutConstraint.activate([
                 titleLabel.leadingAnchor.constraint(equalTo: container.leadingAnchor),
                 titleLabel.centerYAnchor.constraint(equalTo: container.centerYAnchor),
             ])
         } else {
-            let descriptionLabel = UILabel()
-            descriptionLabel.text = description
-            descriptionLabel.font = .systemFont(ofSize: 16)
-            descriptionLabel.textColor = UIColor(white: 0.85, alpha: 1)
-            descriptionLabel.changeConstraints()
-            container.addSubview(descriptionLabel)
+            let descLabel = UILabel()
+            descLabel.text = desc
+            descLabel.font = .systemFont(ofSize: 16)
+            descLabel.textColor = UIColor(white: 0.85, alpha: 1)
+            descLabel.numberOfLines = 1
+            descLabel.lineBreakMode = .byTruncatingTail
+            descLabel.changeConstraints()
+            container.addSubview(descLabel)
             
             NSLayoutConstraint.activate([
                 titleLabel.leadingAnchor.constraint(equalTo: container.leadingAnchor),
                 titleLabel.topAnchor
                     .constraint(equalTo: container.topAnchor, constant: 10),
                 
-                descriptionLabel.leadingAnchor.constraint(equalTo: container.leadingAnchor),
-                descriptionLabel.topAnchor
+                descLabel.leadingAnchor.constraint(equalTo: container.leadingAnchor),
+                descLabel.trailingAnchor
+                    .constraint(lessThanOrEqualTo: container.trailingAnchor),
+                descLabel.topAnchor
                     .constraint(equalTo: titleLabel.bottomAnchor, constant: 0),
             ])
         }
 
-        
         return container
+        
         /*
         let chevron = UIImageView(image: UIImage(systemName: "chevron.right"))
         chevron.tintColor = UIColor(white: 0.5, alpha: 1)
@@ -400,5 +414,22 @@ final class SettingsViewController: BaseViewController {
         return container
          */
     }
+    
+    @objc private func onTapHelpRow(_ sender: UITapGestureRecognizer) {
+        guard let view = sender.view, view.tag > 0 else { return }
+        
+//        switch view.tag {
+//        case 1:
+//        case 2:
+//        case 3:
+//        case 4:
+//        case 5:
+//        case 6:
+//        default : return
+//        }
+        print("onTapHelpRow : \(view.tag) - \(view.restorationIdentifier ?? "")")
+    }
+    
+    
 }
 

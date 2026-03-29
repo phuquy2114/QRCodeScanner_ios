@@ -49,10 +49,10 @@ final class ThemeRadioView: UIView {
 
         // Label
         nameLabel.text = theme.rawValue.capitalizingFirstLetter()
-
         nameLabel.font = .systemFont(ofSize: 17)
         nameLabel.textColor = .white
         nameLabel.translatesAutoresizingMaskIntoConstraints = false
+        
         addSubview(nameLabel)
 
         NSLayoutConstraint.activate([

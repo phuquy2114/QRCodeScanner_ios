@@ -440,6 +440,7 @@ extension BaseViewController {
         keyboardTask = Task { [weak self] in
             guard let self else { return }
             await withTaskGroup(of: Void.self) { group in
+                
                 group.addTask { [weak self] in
                     guard let self else { return }
                     for await notification in NotificationCenter.default
@@ -451,6 +452,7 @@ extension BaseViewController {
                         await self.handleKeyboardShow(notification)
                     }
                 }
+                
                 group.addTask { [weak self] in
                     guard let self else { return }
                     for await notification in NotificationCenter.default

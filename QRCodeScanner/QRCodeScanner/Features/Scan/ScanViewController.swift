@@ -110,6 +110,19 @@ class ScanViewController: BaseViewController {
                 self?.onScanResult(result)
             }
             .store(in: &cancellables)
+        
+        // let errorString = CameraError.permissionDenied.errorDescription?.localized
+        viewModel.$errorMessage
+            .receive(on: RunLoop.main)
+            .sink { [weak self] message in
+                guard let self = self, let message = message, !message.isEmpty else {
+                    return
+                }
+                Task {
+                    await self.showCameraPermissionDeniedAlert()
+                }
+            }
+            .store(in: &cancellables)
 
     }
 
