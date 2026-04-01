@@ -9,4 +9,5 @@ public final class Constants {
     static let storageKeyAppThemeColor = "app_theme_color"
     static let languageDidChange = "language_did_change"
     static let themeDidChange = "theme_did_change"
+    static let userSessionExpired = "user_Session_Expired"
 }

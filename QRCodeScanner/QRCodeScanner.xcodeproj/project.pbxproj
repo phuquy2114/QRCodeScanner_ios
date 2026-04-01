@@ -6,8 +6,15 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		4933B1AABD63B18B4AD19A27 /* Pods_QRCodeScanner.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1CA449FF73DB0A299638DB4A /* Pods_QRCodeScanner.framework */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
+		05C083ED7E2AB472D2292AF6 /* Pods-QRCodeScanner.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-QRCodeScanner.release.xcconfig"; path = "Target Support Files/Pods-QRCodeScanner/Pods-QRCodeScanner.release.xcconfig"; sourceTree = "<group>"; };
+		1CA449FF73DB0A299638DB4A /* Pods_QRCodeScanner.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_QRCodeScanner.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		1F3916412F6A4B8200C61DB7 /* QRCodeScanner.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = QRCodeScanner.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		241C7E460B8A945EBF2A261C /* Pods-QRCodeScanner.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-QRCodeScanner.debug.xcconfig"; path = "Target Support Files/Pods-QRCodeScanner/Pods-QRCodeScanner.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -36,6 +43,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4933B1AABD63B18B4AD19A27 /* Pods_QRCodeScanner.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -47,6 +55,8 @@
 			children = (
 				1FD406252F6C493700CD89B7 /* QRCodeScanner */,
 				1F3916422F6A4B8200C61DB7 /* Products */,
+				26CA8691DAC52EECDE35FC88 /* Pods */,
+				C603FC967C7F7D393AF88414 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -58,6 +68,23 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		26CA8691DAC52EECDE35FC88 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				241C7E460B8A945EBF2A261C /* Pods-QRCodeScanner.debug.xcconfig */,
+				05C083ED7E2AB472D2292AF6 /* Pods-QRCodeScanner.release.xcconfig */,
+			);
+			path = Pods;
+			sourceTree = "<group>";
+		};
+		C603FC967C7F7D393AF88414 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				1CA449FF73DB0A299638DB4A /* Pods_QRCodeScanner.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -65,9 +92,11 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 1F3916542F6A4B8400C61DB7 /* Build configuration list for PBXNativeTarget "QRCodeScanner" */;
 			buildPhases = (
+				AB4E05C0683A5023EF72BE70 /* [CP] Check Pods Manifest.lock */,
 				1F39163D2F6A4B8200C61DB7 /* Sources */,
 				1F39163E2F6A4B8200C61DB7 /* Frameworks */,
 				1F39163F2F6A4B8200C61DB7 /* Resources */,
+				477BC37E6A0A906F157A5673 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -77,8 +106,6 @@
 				1FD406252F6C493700CD89B7 /* QRCodeScanner */,
 			);
 			name = QRCodeScanner;
-			packageProductDependencies = (
-			);
 			productName = QRCodeScanner;
 			productReference = 1F3916412F6A4B8200C61DB7 /* QRCodeScanner.app */;
 			productType = "com.apple.product-type.application";
@@ -128,6 +155,52 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		477BC37E6A0A906F157A5673 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-QRCodeScanner/Pods-QRCodeScanner-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			inputPaths = (
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-QRCodeScanner/Pods-QRCodeScanner-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-QRCodeScanner/Pods-QRCodeScanner-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		AB4E05C0683A5023EF72BE70 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-QRCodeScanner-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		1F39163D2F6A4B8200C61DB7 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
@@ -141,14 +214,16 @@
 /* Begin XCBuildConfiguration section */
 		1F3916552F6A4B8400C61DB7 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 241C7E460B8A945EBF2A261C /* Pods-QRCodeScanner.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = QRCodeScanner/Info.plist;
-				INFOPLIST_KEY_NSCameraUsageDescription = "";
+				INFOPLIST_KEY_NSCameraUsageDescription = "The app needs camera access to scan QR codes. Please go to Settings to grant permission.";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
@@ -172,14 +247,16 @@
 		};
 		1F3916562F6A4B8400C61DB7 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 05C083ED7E2AB472D2292AF6 /* Pods-QRCodeScanner.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = QRCodeScanner/Info.plist;
-				INFOPLIST_KEY_NSCameraUsageDescription = "";
+				INFOPLIST_KEY_NSCameraUsageDescription = "The app needs camera access to scan QR codes. Please go to Settings to grant permission.";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";

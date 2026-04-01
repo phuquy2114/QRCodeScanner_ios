@@ -25,7 +25,6 @@ final class SettingsViewController: BaseViewController {
     private lazy var touchFocusToggle = makeToggle()
 
     private var cancellables = Set<AnyCancellable>()
-
     private let version = "1.3.2"
     
     // MARK: - Lifecycle
@@ -145,7 +144,7 @@ final class SettingsViewController: BaseViewController {
         let view = UIView()
         view.heightAnchor.constraint(equalToConstant: 12).isActive = true
         card.addArrangedSubview(view)
-        
+        /*
         typealias HelpTuple = (title: String, desc: String?, index: Int)
         
         let rows: [HelpTuple] = [
@@ -159,6 +158,11 @@ final class SettingsViewController: BaseViewController {
         
         rows.forEach { (title: String, desc: String?, index: Int) in
             let row = makeHelpRow(title, desc, index)
+            card.addArrangedSubview(row)
+        }
+        */
+        HelpSetting.allCases.forEach { item in
+            let row = makeHelpRow(item.title, item.description, item.rawValue)
             card.addArrangedSubview(row)
         }
         
@@ -337,7 +341,6 @@ final class SettingsViewController: BaseViewController {
         container.tag = index
         container.isUserInteractionEnabled = true
         container.addGestureRecognizer(onTap)
-        container.restorationIdentifier = title
 
         let divider = UIView()
         divider.backgroundColor = UIColor(white: 1, alpha: 0.1)
@@ -416,20 +419,41 @@ final class SettingsViewController: BaseViewController {
     }
     
     @objc private func onTapHelpRow(_ sender: UITapGestureRecognizer) {
-        guard let view = sender.view, view.tag > 0 else { return }
-        
-//        switch view.tag {
-//        case 1:
-//        case 2:
-//        case 3:
-//        case 4:
-//        case 5:
-//        case 6:
-//        default : return
-//        }
-        print("onTapHelpRow : \(view.tag) - \(view.restorationIdentifier ?? "")")
+        guard let view = sender.view else {
+            return
+        }
+
+        let setting = HelpSetting.allCases[view.tag]
+        switch setting {
+        case .faq, .feedback:
+            let vc = setting == .faq ? FAQViewController() : FeedbackViewController()
+            self.push(vc)
+            
+        case .rateUs:
+            view.subviews.forEach { subview in
+                
+                guard let label = subview as? UILabel,
+                      let title = label.text else {
+                    return
+                }
+
+                if setting.title == title {
+                    label.text = "Rate (opened)"
+                    return
+                }
+            }
+
+        case .share:
+            Task {
+                await self.share(items: [self])
+            }
+        case .privacyPolicy, .termsOfUse:
+            let url = ""
+            Task {
+                await self.openURL(url)
+            }
+        }
+
     }
-    
-    
 }
 

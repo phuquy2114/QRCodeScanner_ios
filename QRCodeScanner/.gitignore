@@ -1,0 +1,14 @@
+Pods/*
+
+# Swift Package Manager
+Packages/
+Package.pins
+Package.resolved
+*.xcodeproj/project.xcworkspace/
+.swiftpm/
+
+# Xcode
+DerivedData/
+build/
+*.xcworkspace
+xcuserdata/

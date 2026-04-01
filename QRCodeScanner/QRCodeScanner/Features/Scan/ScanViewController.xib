@@ -72,7 +72,7 @@
                                 <constraint firstAttribute="width" constant="36" id="jJF-Zq-UqU"/>
                             </constraints>
                             <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                            <state key="normal" image="camera.rotate.fill" catalog="system"/>
+                            <state key="normal" image="arrow.trianglehead.2.clockwise.rotate.90.camera.fill" catalog="system"/>
                             <connections>
                                 <action selector="handleCameraButton:" destination="-1" eventType="touchUpInside" id="cXi-dF-b2I"/>
                             </connections>
@@ -142,8 +142,8 @@
         </view>
     </objects>
     <resources>
+        <image name="arrow.trianglehead.2.clockwise.rotate.90.camera.fill" catalog="system" width="128" height="93"/>
         <image name="bolt.slash.fill" catalog="system" width="98" height="128"/>
-        <image name="camera.rotate.fill" catalog="system" width="128" height="93"/>
         <image name="minus" catalog="system" width="128" height="26"/>
         <image name="photo.stack.fill" catalog="system" width="126" height="128"/>
         <image name="plus" catalog="system" width="128" height="113"/>

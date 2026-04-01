@@ -13,4 +13,9 @@ public extension Notification.Name {
     static let languageDidChange = Notification.Name(Constants.languageDidChange)
     
     static let themeDidChange = Notification.Name(Constants.themeDidChange)
+    
+    static let userSessionExpired = Notification.Name(
+        Constants.userSessionExpired
+    )
+    
 }
