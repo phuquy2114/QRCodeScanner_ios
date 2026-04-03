@@ -5,32 +5,134 @@
 //  Created by Ngo Nghia on 31/3/26.
 //
 import UIKit
+import Combine
 
 class FeedbackViewController: BaseViewController {
-
-    private let heightButton: CGFloat = 48
-    private let submitButton: UIButton = UIButton()
-    private let imageContainer: UIView = UIView()
+    private let scrollView = UIScrollView()
+    private let contentStack = UIStackView()
+    
+    private let submitButton = FilledButton()
     private let viewModel = FeedbackViewModel()
     private let titleLabel = UILabel()
+    private let textView = TextInputTextView(placeholder: "Describe your problem...")
     private let tableView: UITableView = UITableView(
         frame: .zero,
         style: .plain
     )
-
+    private var cancellables  = Set<AnyCancellable>()
+    
+    // Image picker
+    private let imageSection = ImageSection()
+    
     override func viewDidLoad() {
         setupUI()
-
+        setupActions()
+        bindData()
     }
 
     override func setupUI() {
         self.view.backgroundColor = .black
         setupNavigationBar()
+        setupScrollView()
         buildTitle()
         buildTableView()
-        buildSubmitButton()
-        buildAttachFile()
         buildDesc()
+        buildAttachFile()
+        buildSubmitButton()
+    }
+    
+    override func setupActions() {
+        // Description
+        textView.onTextChanged = { [weak self] text in
+            self?.viewModel.description = text
+        }
+        
+        // Add image
+        imageSection.onAddTapped = { [weak self] in
+            self?.presentImagePicker()
+        }
+        
+        imageSection.onRemoveTapped = { [weak self] index in
+            self?.viewModel.removeImage(at: index)
+        }
+        
+        submitButton.addAction(
+            .init { [weak self] _ in
+                self?.viewModel.submitFeedback()
+            },
+            for: .touchUpInside
+        )
+    }
+    
+    override func bindData() {
+        viewModel.$title
+            .receive(on: RunLoop.main)
+            .combineLatest(viewModel.$description.receive(on: RunLoop.main))
+            .map { newTitle, newDesc in 
+                let titleOk = !newTitle.trimmingCharacters(in: .whitespaces).isEmpty
+                let descOk  = !newDesc.trimmingCharacters(in: .whitespaces).isEmpty
+                return titleOk && descOk
+            }
+            .sink { [weak self] valid in
+                self?.submitButton.setEnabled(valid)
+            }
+            .store(in: &cancellables)
+        
+        // Validation errors
+        viewModel.$titleError
+            .receive(on: RunLoop.main)
+            .sink { [weak self] error in
+                if let errorMessage = error {
+                    self?.showToastAsync(errorMessage)
+                }
+            }
+            .store(in: &cancellables)
+        
+        viewModel.$descriptionError
+            .receive(on: RunLoop.main)
+            .sink { [weak self] error in
+                if let errorMessage = error {
+                    self?.showToastAsync(errorMessage)
+                }
+                self?.textView.setError(error != nil)
+            }
+            .store(in: &cancellables)
+        
+        // Images
+        viewModel.$attachFiles
+            .receive(on: RunLoop.main)
+            .sink { [weak self] images in
+                guard let self else { return }
+                self.imageSection.setImages(
+                    images,
+                    canAdd: self.viewModel.canAddMoreImages
+                )
+            }
+            .store(in: &cancellables)
+        
+        // ViewState
+        viewModel.$state
+            .receive(on: RunLoop.main)
+            .sink { [weak self] state in
+                guard let self else { return }
+                switch state {
+                case .loading:
+                    self.submitButton.setLoading(true)
+                case .success:
+                    self.submitButton.setLoading(false)
+                    self.showToastAsync("Feedback submitted successfully! 🎉")
+                    Task {
+                        await self.delay(seconds: 1.5)
+                        self.pop()
+                    }
+                case .error(let msg):
+                    self.submitButton.setLoading(false)
+                    Task { await self.showAlert(title: "Error: ", message: msg) }
+                default:
+                    self.submitButton.setLoading(false)
+                }
+            }
+            .store(in: &cancellables)
     }
 
     private func setupNavigationBar() {
@@ -40,6 +142,41 @@ class FeedbackViewController: BaseViewController {
             font: .boldSystemFont(ofSize: 24),
             color: .white
         )
+    }
+    
+    private func setupScrollView() {
+        scrollView.showsVerticalScrollIndicator = false
+        scrollView.keyboardDismissMode = .interactive
+        scrollView.changeConstraints()
+        view.addSubview(scrollView)
+        
+        NSLayoutConstraint.activate([
+            scrollView.topAnchor.constraint(
+                equalTo: view.safeAreaLayoutGuide.topAnchor),
+            scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            scrollView.bottomAnchor.constraint(
+                equalTo: view.safeAreaLayoutGuide.bottomAnchor,
+                constant: -(48 + 8 + 24))
+        ])
+    }
+    
+    private func buildTitle() {
+        titleLabel.textColor = .white
+        titleLabel.text = "What problems did you encounter?"
+        titleLabel.font = .boldSystemFont(ofSize: 22)
+        titleLabel.textAlignment = .center
+        titleLabel.changeConstraints()
+        scrollView.addSubview(titleLabel)
+        
+        NSLayoutConstraint.activate([
+            titleLabel.leadingAnchor.constraint(
+                equalTo: scrollView.leadingAnchor,constant: 8),
+            titleLabel.centerXAnchor.constraint(equalTo: scrollView.centerXAnchor),
+            titleLabel.topAnchor
+                .constraint(equalTo: scrollView.topAnchor, constant: 12),
+            titleLabel.widthAnchor.constraint(lessThanOrEqualTo: scrollView.widthAnchor)
+        ])
     }
 
     private func buildTableView() {
@@ -53,167 +190,71 @@ class FeedbackViewController: BaseViewController {
             forCellReuseIdentifier: FeedbackItemCell.identifier
         )
         tableView.changeConstraints()
-        view.addSubview(tableView)
-
-        NSLayoutConstraint.activate(
-            [
-                tableView.topAnchor
-                    .constraint(
-                        equalTo: self.titleLabel.bottomAnchor,
-                        constant: 16
-                    ),
-                tableView.leadingAnchor
-                    .constraint(equalTo: view.leadingAnchor, constant: 16),
-                tableView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-                tableView.heightAnchor.constraint(lessThanOrEqualToConstant: 250)
-            ]
-        )
-    }
-
-    private func buildTitle() {
-        titleLabel.textColor = .white
-        titleLabel.text = "What problems did you encounter?"
-        titleLabel.font = .boldSystemFont(ofSize: 22)
-        titleLabel.textAlignment = .center
-        titleLabel.changeConstraints()
-        view.addSubview(titleLabel)
+        scrollView.addSubview(tableView)
 
         NSLayoutConstraint.activate([
-            titleLabel.leadingAnchor.constraint(
-                equalTo: view.leadingAnchor,
-                constant: 4
-            ),
-            titleLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            titleLabel.topAnchor.constraint(
-                equalTo: view.safeAreaLayoutGuide.topAnchor,
-                constant: 16
-            ),
-            titleLabel.widthAnchor
-                .constraint(lessThanOrEqualTo: view.widthAnchor),
+            tableView.topAnchor.constraint(
+                equalTo: self.titleLabel.bottomAnchor,
+                constant: 16),
+            tableView.leadingAnchor
+                .constraint(equalTo: scrollView.leadingAnchor, constant: 16),
+            tableView.centerXAnchor.constraint(equalTo: scrollView.centerXAnchor),
+            tableView.heightAnchor.constraint(lessThanOrEqualToConstant: 250),
         ])
-
     }
-    
+
     private func buildDesc() {
-        let textView = UITextView()
-        textView.isEditable = true
-        textView.backgroundColor = .backgroundColor
-        textView.textColor = UIColor(white: 0.9, alpha: 1)
-        textView.font = .systemFont(ofSize: 18)
-        textView.text = "đááds"
-        textView.contentInset = UIEdgeInsets(top: 4, left: 8, bottom: 4, right: 8)
-        textView.layer.cornerRadius = 6
-        view.addSubview(textView)
+        scrollView.addSubview(textView)
         textView.changeConstraints()
-        
-        
         NSLayoutConstraint.activate([
-            textView.leadingAnchor.constraint(equalTo: tableView.leadingAnchor),
-            textView.trailingAnchor
-                .constraint(equalTo: tableView.trailingAnchor),
-            textView.bottomAnchor
-                .constraint(equalTo: imageContainer.topAnchor, constant: -16),
-            textView.topAnchor.constraint(
-                    lessThanOrEqualTo: tableView.bottomAnchor,
-                    constant: 16)
+            textView.leadingAnchor
+                .constraint(equalTo: scrollView.leadingAnchor, constant: 16),
+            textView.centerXAnchor.constraint(equalTo: scrollView.centerXAnchor),
+            textView.topAnchor
+                .constraint(equalTo: tableView.bottomAnchor, constant: 8),
         ])
-    
     }
     
     private func buildAttachFile() {
-        imageContainer.backgroundColor = UIColor(white: 0.2, alpha: 1)
-        imageContainer.layer.cornerRadius = 18
-        imageContainer.clipsToBounds = true
-        imageContainer.layer.borderColor = UIColor.clear.cgColor
-        imageContainer.isUserInteractionEnabled = true
-        view.addSubview(imageContainer)
-        imageContainer.changeConstraints()
-        
-        NSLayoutConstraint.activate([
-            imageContainer.heightAnchor.constraint(equalToConstant: 48),
-            imageContainer.widthAnchor.constraint(equalToConstant: 54),
-            imageContainer.leadingAnchor
-                .constraint(equalTo: view.leadingAnchor, constant: 16),
-            imageContainer.bottomAnchor
-                .constraint(equalTo: submitButton.topAnchor, constant: -24),
-        ])
-        let tap = UITapGestureRecognizer(
-            target: self,
-            action: #selector(tapImage(_:))
-        )
-        imageContainer.addGestureRecognizer(tap)
-        let image = UIImageView()
-        let config = UIImage.SymbolConfiguration(pointSize: 16, weight: .medium)
-        
-        image.image = UIImage(
-            systemName: "camera.fill",
-            withConfiguration: config
-        )?.withRenderingMode(.alwaysTemplate)
-        image.tintColor = UIColor(white: 0.8, alpha: 1)
-        image.contentMode = .scaleAspectFit
-        
-        imageContainer.addSubview(image)
-        image.changeConstraints()
-        
-        NSLayoutConstraint.activate([
-            image.centerXAnchor
-                .constraint(equalTo: imageContainer.centerXAnchor),
-            image.centerYAnchor
-                .constraint(equalTo: imageContainer.centerYAnchor),
-            image.heightAnchor.constraint(equalToConstant: 32),
-            image.widthAnchor.constraint(equalToConstant: 32),
-        ])
-        
         let label = UILabel()
-        label.text = "Attach image"
-        label.font = .systemFont(ofSize: 18, weight: .semibold)
+        label.text = "Attach images (maximum \(self.viewModel.maxImages) images)"
+        label.font = .systemFont(ofSize: 14, weight: .semibold)
         label.numberOfLines = 1
         label.lineBreakMode = .byTruncatingTail
         label.backgroundColor = .clear
         label.textColor = UIColor(white: 0.8, alpha: 1)
-        view.addSubview(label)
+        scrollView.addSubview(label)
         label.changeConstraints()
-        
+
         NSLayoutConstraint.activate([
             label.leadingAnchor
-                .constraint(equalTo: imageContainer.trailingAnchor, constant: 16),
-            label.centerYAnchor
-                .constraint(equalTo: imageContainer.centerYAnchor),
-            label.trailingAnchor.constraint(
-                    lessThanOrEqualTo: view.trailingAnchor,
-                    constant: -70)
+                .constraint(equalTo: scrollView.leadingAnchor, constant: 16),
+            label.centerXAnchor
+                .constraint(equalTo: scrollView.centerXAnchor),
+            label.topAnchor.constraint(
+                equalTo: textView.bottomAnchor, constant: 16),
+            label.heightAnchor.constraint(equalToConstant: 20)
         ])
         
-        let imageTick = UIImageView()
-        imageTick.tintColor = .green
-        imageTick.contentMode = .scaleAspectFit
-        imageTick.image = UIImage(systemName: "camera.fill")
-        view.addSubview(imageTick)
-        imageTick.changeConstraints()
-        
+        scrollView.addSubview(imageSection)
+        imageSection.changeConstraints()
         NSLayoutConstraint.activate([
-            imageTick.centerYAnchor
-                .constraint(equalTo: label.centerYAnchor),
-            imageTick.leadingAnchor
-                .constraint(equalTo: label.trailingAnchor, constant: 12),
-            imageTick.widthAnchor.constraint(equalToConstant: 28),
-            imageTick.heightAnchor.constraint(equalToConstant: 28),
+            imageSection.leadingAnchor.constraint(
+                equalTo: scrollView.leadingAnchor, constant: 16),
+            imageSection.trailingAnchor.constraint(
+                lessThanOrEqualTo: scrollView.trailingAnchor,
+                constant: -16),
+            imageSection.topAnchor.constraint(
+                equalTo: label.bottomAnchor, constant: 6),
+            imageSection.bottomAnchor
+                .constraint(equalTo: scrollView.bottomAnchor, constant: -50)
         ])
+
     }
 
     private func buildSubmitButton() {
-        submitButton.applyAccentBackground()
-        submitButton.backgroundColor = ThemeManager.shared.themeColor
-        submitButton.layer.cornerRadius = 6
         submitButton.setTitleColor(.black, for: .normal)
         submitButton.setTitle("SUBMIT", for: .normal)
-        submitButton.titleLabel?.font = .boldSystemFont(ofSize: 18)
-        submitButton.addAction(
-            .init { [weak self] _ in
-                
-            },
-            for: .touchUpInside
-        )
         submitButton.changeConstraints()
         view.addSubview(submitButton)
 
@@ -227,14 +268,57 @@ class FeedbackViewController: BaseViewController {
                 equalTo: view.safeAreaLayoutGuide.bottomAnchor,
                 constant: -16
             ),
-            submitButton.heightAnchor.constraint(equalToConstant: heightButton),
             submitButton.widthAnchor
                 .constraint(lessThanOrEqualTo: view.widthAnchor),
         ])
     }
     
-    @objc private func tapImage(_ sender: UITapGestureRecognizer) {
-        print("dssadasdasd")
+    private func presentImagePicker() {
+        Task {
+            let choice = await showActionSheet(
+                title: "Add images",
+                actions: [
+                    ("Take a photo", .default),
+                    ("Choose from the library", .default),
+                ]
+            )
+            switch choice {
+            case 0: self.openCamera()
+            case 1: self.openPhotoLibrary()
+            default: break
+            }
+        }
+    }
+    
+    private func openCamera() {
+        guard UIImagePickerController.isSourceTypeAvailable(.camera) else {
+            return
+        }
+        let picker = UIImagePickerController()
+        picker.sourceType = .camera
+        picker.delegate = self
+        present(picker, animated: true)
+    }
+    
+    private func openPhotoLibrary() {
+        let picker = UIImagePickerController()
+        picker.sourceType = .photoLibrary
+        picker.delegate = self
+        present(picker, animated: true)
+    }
+
+    // MARK: - Keyboard
+
+    override func keyboardWillShow(height: CGFloat, duration: TimeInterval) {
+        UIView.animate(withDuration: duration) {
+            self.scrollView.contentInset.bottom = height
+        }
+    }
+
+    override func keyboardWillHide(duration: TimeInterval) {
+        UIView.animate(withDuration: duration) {
+            self.scrollView.contentInset.bottom = 0
+        }
     }
 }
 
@@ -263,4 +347,20 @@ extension FeedbackViewController: UITableViewDataSource {
         return cell
     }
 }
+
+// MARK: - UIImagePickerControllerDelegate
+extension FeedbackViewController: UIImagePickerControllerDelegate,
+    UINavigationControllerDelegate {
+    func imagePickerController(
+        _ picker: UIImagePickerController,
+        didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
+        picker.dismiss(animated: true)
+        guard
+            let image = info[.editedImage] as? UIImage
+                ?? info[.originalImage] as? UIImage
+        else { return }
+        viewModel.addImage(image)
+    }
+}
+
 

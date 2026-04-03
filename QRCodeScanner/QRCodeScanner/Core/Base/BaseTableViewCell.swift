@@ -55,10 +55,12 @@ class BaseTableViewCell: UITableViewCell {
         // Ví dụ: fatalError("configure(with:) phải được override ở subclass")
     }
     
-    // Convenience overload nếu bạn dùng generic hoặc protocol
-//    func configure<Model: CellConfigurable>(with model: Model) where Model.Cell == Self {
-//        model.configure(cell: self)
-//    }
+    // Convenience overload nếu dùng generic hoặc protocol
+    func configure<Model: CellConfigurable>(with model: Model) where Model.Cell: BaseTableViewCell {
+        if let cell = self as? Model.Cell {
+            model.configure(cell: cell)
+        }
+    }
     
     // MARK: - Reuse
     override func prepareForReuse() {

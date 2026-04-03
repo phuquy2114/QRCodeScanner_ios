@@ -145,6 +145,12 @@ open class BaseViewController: UIViewController {
     open func setBackgroundColor(color: UIColor? = nil) {
         view.backgroundColor = color ?? .backgroundColor
     }
+    
+    /// Override ở subclass để xử lý khi bàn phím xuất hiện
+    public func keyboardWillShow(height: CGFloat, duration: TimeInterval) {}
+
+    /// Override ở subclass để xử lý khi bàn phím ẩn
+    public func keyboardWillHide(duration: TimeInterval) {}
 }
 
 // MARK: - Navigation Helpers
@@ -429,12 +435,6 @@ extension BaseViewController {
 
 extension BaseViewController {
 
-    /// Override ở subclass để xử lý khi bàn phím xuất hiện
-    public func keyboardWillShow(height: CGFloat, duration: TimeInterval) {}
-
-    /// Override ở subclass để xử lý khi bàn phím ẩn
-    public func keyboardWillHide(duration: TimeInterval) {}
-
     /// Dùng NotificationCenter async sequence thay vì addObserver/selector
     private func startKeyboardObserving() {
         keyboardTask = Task { [weak self] in
@@ -705,7 +705,7 @@ extension BaseViewController {
     }
 
     // Chạy task nặng ở background, không cần trả về kiểu dữ liệu, hàm Void
-    static func onBackground(
+    static func onBackgroundVoid(
         priority: TaskPriority = .userInitiated,
         operation: @Sendable @escaping () async -> Void
     ) {

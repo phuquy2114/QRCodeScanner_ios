@@ -20,7 +20,10 @@ final class FAQItemCell: BaseTableViewCell {
     private let answerLabel = UILabel()
     private let divider = UIView()
     private let expandableContainer = UIView()
-    private var expandableHeightConstraint: NSLayoutConstraint!
+    
+    // Khai báo 2 trạng thái constraint cho thẻ Card
+    private var expandedConstraint: NSLayoutConstraint!
+    private var collapsedConstraint: NSLayoutConstraint!
     
     // MARK: Init
 
@@ -126,24 +129,21 @@ final class FAQItemCell: BaseTableViewCell {
 
         
         // ── Expandable container ──────────────────────────────
-        // clipsToBounds = true → khi height = 0, content bị ẩn hoàn toàn
         expandableContainer.clipsToBounds = true
+        expandableContainer.isHidden = true
         expandableContainer.changeConstraints()
         card.addSubview(expandableContainer)
-        
-        // height = 0 mặc định (collapsed)
-        expandableHeightConstraint = expandableContainer.heightAnchor.constraint(equalToConstant: 0)
-        // cho phép nội dung bên trong push nếu cần
-        //expandableHeightConstraint.priority = .defaultHigh
         
         NSLayoutConstraint.activate([
             expandableContainer.topAnchor
                 .constraint(equalTo: questionLabel.bottomAnchor, constant: 0),
             expandableContainer.widthAnchor
-                .constraint(equalTo: card.widthAnchor),
-            expandableContainer.bottomAnchor.constraint(equalTo: card.bottomAnchor),
-            expandableHeightConstraint
+                .constraint(equalTo: card.widthAnchor)
         ])
+        
+        // Tạo sẵn 2 constraint quyết định chiều cao của Card
+        expandedConstraint = expandableContainer.bottomAnchor.constraint(equalTo: card.bottomAnchor)
+        collapsedConstraint = questionLabel.bottomAnchor.constraint(equalTo: card.bottomAnchor, constant: -16)
         
         // Divider
         divider.backgroundColor = UIColor(white: 1, alpha: 0.1)
@@ -184,10 +184,6 @@ final class FAQItemCell: BaseTableViewCell {
                 constant: 16
             ),
             answerLabel.centerXAnchor.constraint(equalTo: expandableContainer.centerXAnchor),
-
-        ])
-        
-        NSLayoutConstraint.activate([
             answerLabel.bottomAnchor.constraint(
                 equalTo: expandableContainer.bottomAnchor,
                 constant: -16
@@ -209,6 +205,7 @@ final class FAQItemCell: BaseTableViewCell {
         answerLabel.text = item.answer
 
         let isExpanded = item.isExpanded
+        expandableContainer.isHidden = !isExpanded
         answerLabel.isHidden = !isExpanded
         divider.isHidden = !isExpanded
 
@@ -222,20 +219,13 @@ final class FAQItemCell: BaseTableViewCell {
             withConfiguration: chevronConfig
         )
         
-        // deactivate height = 0 khi expand, activate khi collapse
-        if item.isExpanded {
-            NSLayoutConstraint.deactivate([
-                expandableHeightConstraint,
-                questionLabel.bottomAnchor
-                    .constraint(equalTo: card.bottomAnchor, constant: -14)
-            ])
+        // Hoán đổi constraint để tự động co giãn thẻ Card mượt mà
+        if isExpanded {
+            NSLayoutConstraint.deactivate([collapsedConstraint])
+            NSLayoutConstraint.activate([expandedConstraint])
         } else {
-            NSLayoutConstraint.activate([
-                expandableHeightConstraint,
-                questionLabel.bottomAnchor
-                    .constraint(equalTo: card.bottomAnchor, constant: -14)
-            ])
+            NSLayoutConstraint.deactivate([expandedConstraint])
+            NSLayoutConstraint.activate([collapsedConstraint])
         }
-        
     }
 }

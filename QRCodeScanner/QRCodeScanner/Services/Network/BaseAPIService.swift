@@ -20,49 +20,67 @@ open class BaseAPIService {
 
     // Shorthand methods — gọi gọn hơn trong subclass
 
-    func get<T: Decodable>(_ endpoint: APIEndpoint,
-                            params: APIParameters? = nil) async throws -> T {
+    func get<T: Decodable>(
+        _ endpoint: APIEndpoint,
+        params: APIParameters? = nil
+    ) async throws -> T {
         try await client.request(endpoint, parameters: params)
     }
 
-    func getData<T: Decodable>(_ endpoint: APIEndpoint,
-                                params: APIParameters? = nil) async throws -> T {
+    func getData<T: Decodable>(
+        _ endpoint: APIEndpoint,
+        params: APIParameters? = nil
+    ) async throws -> T {
         try await client.requestData(endpoint, parameters: params)
     }
 
-    func post<T: Decodable>(_ endpoint: APIEndpoint,
-                             body: APIParameters? = nil) async throws -> T {
+    func post<T: Decodable>(
+        _ endpoint: APIEndpoint,
+        body: APIParameters? = nil
+    ) async throws -> T {
         try await client.request(endpoint, parameters: body)
     }
 
-    func postData<T: Decodable>(_ endpoint: APIEndpoint,
-                                 body: APIParameters? = nil) async throws -> T {
+    func postData<T: Decodable>(
+        _ endpoint: APIEndpoint,
+        body: APIParameters? = nil
+    ) async throws -> T {
         try await client.requestData(endpoint, parameters: body)
     }
 
-    func put<T: Decodable>(_ endpoint: APIEndpoint,
-                            body: APIParameters? = nil) async throws -> T {
+    func put<T: Decodable>(
+        _ endpoint: APIEndpoint,
+        body: APIParameters? = nil
+    ) async throws -> T {
         try await client.request(endpoint, parameters: body)
     }
 
-    func patch<T: Decodable>(_ endpoint: APIEndpoint,
-                              body: APIParameters? = nil) async throws -> T {
+    func patch<T: Decodable>(
+        _ endpoint: APIEndpoint,
+        body: APIParameters? = nil
+    ) async throws -> T {
         try await client.request(endpoint, parameters: body)
     }
 
-    func delete(_ endpoint: APIEndpoint,
-                params: APIParameters? = nil) async throws {
+    func delete(
+        _ endpoint: APIEndpoint,
+        params: APIParameters? = nil
+    ) async throws {
         try await client.requestVoid(endpoint, parameters: params)
     }
 
-    func upload<T: Decodable>(_ endpoint: APIEndpoint,
-                               multipart: @escaping (MultipartFormData) -> Void,
-                               onProgress: ((Double) -> Void)? = nil) async throws -> T {
-        try await client.upload(endpoint,
-                                multipartData: multipart,
-                                onProgress: onProgress)
+    func upload<T: Decodable>(
+        _ endpoint: APIEndpoint,
+        multipart: @escaping (MultipartFormData) -> Void,
+        onProgress: ((Double) -> Void)? = nil
+    ) async throws -> T {
+        try await client.upload(
+            endpoint,
+            multipartData: multipart,
+            onProgress: onProgress
+        )
     }
-    
+
     func download(
         _ endpoint: APIEndpoint,
         to destination: URL,
@@ -80,7 +98,7 @@ open class BaseAPIService {
 extension JSONDecoder {
     static var apiDefault: JSONDecoder {
         let decoder = JSONDecoder()
-        decoder.keyDecodingStrategy  = .convertFromSnakeCase  // user_name → userName
+        decoder.keyDecodingStrategy = .convertFromSnakeCase  // user_name → userName
         decoder.dateDecodingStrategy = .iso8601
         return decoder
     }
@@ -93,7 +111,8 @@ extension JSONDecoder {
 extension AFError {
     var responseCode: Int? {
         if case .responseValidationFailed(let reason) = self,
-           case .unacceptableStatusCode(let code) = reason {
+            case .unacceptableStatusCode(let code) = reason
+        {
             return code
         }
         return nil

@@ -27,7 +27,6 @@ final class NetworkClient {
     }
 
     // MARK: - Generic Request → Decodable
-
     /// Gọi API và decode thẳng sang kiểu T
     func request<T: Decodable>(
         _ endpoint: APIEndpoint,
@@ -58,7 +57,6 @@ final class NetworkClient {
     }
 
     // MARK: - APIResponse wrapper (success/data/message)
-
     /// Gọi API và unwrap `APIResponse<T>.data`
     func requestData<T: Decodable>(
         _ endpoint: APIEndpoint,
@@ -79,7 +77,6 @@ final class NetworkClient {
     }
 
     // MARK: - Void response (không cần decode body)
-
     func requestVoid(
         _ endpoint: APIEndpoint,
         parameters: APIParameters? = nil
@@ -128,11 +125,14 @@ final class NetworkClient {
                 onProgress?(progress.fractionCompleted)
             }
             .responseDecodable(of: T.self, decoder: decoder) { response in
+                
                 switch response.result {
                 case .success(let value):
                     continuation.resume(returning: value)
                 case .failure(let error):
-                    continuation.resume(throwing: self.mapError(error, data: response.data))
+                    continuation.resume(
+                        throwing: self.mapError(error, data: response.data)
+                    )
                 }
             }
         }

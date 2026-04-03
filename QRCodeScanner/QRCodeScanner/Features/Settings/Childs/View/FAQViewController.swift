@@ -83,25 +83,14 @@ class FAQViewController: BaseViewController {
         tableView.changeConstraints()
         view.addSubview(tableView)
 
-        NSLayoutConstraint.activate(
-            [
-                tableView.topAnchor
-                    .constraint(
-                        equalTo: view.safeAreaLayoutGuide.topAnchor,
-                        constant: self.heightButton + 32
-                    ),
-                tableView.leadingAnchor
-                    .constraint(equalTo: view.leadingAnchor, constant: 16),
-                tableView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-                tableView.bottomAnchor
-                    .constraint(
-                        equalTo: view.safeAreaLayoutGuide
-                            .bottomAnchor,
-                        constant: -20
-                    ),
-            ]
-        )
-
+        NSLayoutConstraint.activate([
+            tableView.topAnchor.constraint(
+                    equalTo: view.safeAreaLayoutGuide.topAnchor,
+                    constant: self.heightButton + 32),
+            tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            tableView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            tableView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -20),
+        ])
     }
 }
 
@@ -119,15 +108,14 @@ extension FAQViewController: UITableViewDataSource {
         _ tableView: UITableView,
         cellForRowAt indexPath: IndexPath
     ) -> UITableViewCell {
-        guard
-            let cell = tableView.dequeueReusableCell(
+        guard let cell = tableView.dequeueReusableCell(
                 withIdentifier: FAQItemCell.identifier,
-                for: indexPath
-            ) as? FAQItemCell
-        else {
+                for: indexPath ) as? FAQItemCell else {
             return UITableViewCell()
         }
+        
         cell.configure(with: viewModel.items[indexPath.row])
+        
         return cell
     }
 }

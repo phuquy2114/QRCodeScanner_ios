@@ -51,7 +51,7 @@ class FeedbackItemCell: BaseTableViewCell {
         button.changeConstraints()
         NSLayoutConstraint.activate([
             button.topAnchor
-                .constraint(equalTo: contentView.topAnchor, constant: 16),
+                .constraint(equalTo: contentView.topAnchor, constant: 8),
             button.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
             button.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
             button.trailingAnchor

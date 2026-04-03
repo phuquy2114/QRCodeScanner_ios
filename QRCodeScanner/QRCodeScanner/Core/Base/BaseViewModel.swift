@@ -245,7 +245,6 @@ extension BaseViewModel {
 // MARK: - Validation Helpers
 
 extension BaseViewModel {
-
     /// Validate và trả về lỗi nếu có
     @discardableResult
     func validate(_ rules: [ValidationRule]) -> Bool {
@@ -260,7 +259,6 @@ extension BaseViewModel {
 }
 
 // MARK: - ValidationRule
-
 public struct ValidationRule {
     let validate: () -> String?
 
@@ -280,6 +278,13 @@ public struct ValidationRule {
             value.count < min
                 ? "\(fieldName) \("It_must_have_at_least".localized) \(min) \("characters".localized)"
                 : nil
+        }
+    }
+    
+    /// Độ dài tối đa
+    static func maxLength(_ value: String, max: Int, fieldName: String) -> ValidationRule {
+        ValidationRule {
+            value.count > max ? "\(fieldName) tối đa \(max) ký tự" : nil
         }
     }
 
