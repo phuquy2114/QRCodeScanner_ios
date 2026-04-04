@@ -38,7 +38,7 @@ class FAQViewController: BaseViewController {
 
     private func buildProblemButton() {
         let button = UIButton()
-        button.applyAccentBackground()
+        button.applyThemeBackground()
         button.backgroundColor = ThemeManager.shared.themeColor
         button.layer.cornerRadius = 6
         button.setTitleColor(.black, for: .normal)

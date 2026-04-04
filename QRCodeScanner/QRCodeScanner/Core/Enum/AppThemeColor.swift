@@ -30,8 +30,8 @@ enum AppThemeColor: String, CaseIterable, Codable {
     }
 
     /*
-    /// Màu text trên nền accent (đảm bảo contrast)
-    func onAccentColor() -> UIColor {
+    /// Màu text trên nền theme (đảm bảo contrast)
+    func onThemeColor() -> UIColor {
         switch self {
         case .yellow, .green, .orange:
             return .black

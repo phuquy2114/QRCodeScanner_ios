@@ -10,10 +10,10 @@ import UIKit
 // MARK: - ScanOverlayView
 final class ScanOverlayView: UIView {
 
-    var accentColor: UIColor = ThemeManager.shared.themeColor {
+    var themeColor: UIColor = ThemeManager.shared.themeColor {
         didSet {
             setNeedsDisplay()
-            scanLine.backgroundColor = accentColor
+            scanLine.backgroundColor = themeColor
         }
     }
 
@@ -39,7 +39,7 @@ final class ScanOverlayView: UIView {
     private func setup() {
         backgroundColor = .clear
 
-        scanLine.backgroundColor = accentColor
+        scanLine.backgroundColor = themeColor
         scanLine.layer.cornerRadius = 1
         scanLine.translatesAutoresizingMaskIntoConstraints = false
         addSubview(scanLine)
@@ -67,7 +67,7 @@ final class ScanOverlayView: UIView {
         guard let ctx = UIGraphicsGetCurrentContext() else { return }
         ctx.clear(rect)
 
-        accentColor.setStroke()
+        themeColor.setStroke()
         ctx.setLineWidth(cornerWidth)
         ctx.setLineCap(.square)
 
@@ -135,7 +135,7 @@ final class ScanOverlayView: UIView {
             },
             completion: { _ in
                 UIView.animate(withDuration: 0.2) {
-                    self.scanLine.backgroundColor = self.accentColor
+                    self.scanLine.backgroundColor = self.themeColor
                 }
             }
         )

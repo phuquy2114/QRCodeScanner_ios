@@ -41,9 +41,9 @@ final class ThemeManager {
 
     // MARK: - Public API
 
-    /// Màu accent hiện tại — dùng ở mọi nơi
+    /// Màu themeColor hiện tại — dùng ở mọi nơi
     var themeColor: UIColor { currentTheme.color() }
-    //var onAccentColor: UIColor { currentTheme.onAccentColor() }
+    //var onThemeColor: UIColor { currentTheme.onThemeColor() }
 
     /// Đổi theme
     func apply(_ newTheme: AppThemeColor) {
@@ -54,23 +54,23 @@ final class ThemeManager {
 
     /// Gọi 1 lần sau khi load app + mỗi khi đổi theme
     func applyGlobally() {
-        let accent = themeColor
+        let color = themeColor
 
         // UISwitch
-        UISwitch.appearance().onTintColor = accent
+        UISwitch.appearance().onTintColor = color
 
         // UISlider
-        UISlider.appearance().minimumTrackTintColor = accent
-        UISlider.appearance().thumbTintColor = accent
+        UISlider.appearance().minimumTrackTintColor = color
+        UISlider.appearance().thumbTintColor = color
 
         // UIProgressView
-        UIProgressView.appearance().progressTintColor = accent
+        UIProgressView.appearance().progressTintColor = color
 
         // UIPageControl
-        UIPageControl.appearance().currentPageIndicatorTintColor = accent
+        UIPageControl.appearance().currentPageIndicatorTintColor = color
 
         // NavigationBar tint
-        UINavigationBar.appearance().tintColor = accent
+        UINavigationBar.appearance().tintColor = color
 
         // Notify toàn app re-render (iOS 15+)
         refreshAllWindows()

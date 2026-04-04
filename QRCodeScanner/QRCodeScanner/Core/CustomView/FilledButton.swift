@@ -29,7 +29,7 @@ final class FilledButton: UIButton {
         self.backgroundColor = ThemeManager.shared.themeColor
         setTitleColor(.black, for: .normal)
         layer.cornerRadius = 14
-        self.applyAccentBackground()
+        self.applyThemeBackground()
         heightAnchor.constraint(equalToConstant: 48).isActive = true
 
         indicator.hidesWhenStopped = true

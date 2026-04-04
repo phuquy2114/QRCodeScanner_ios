@@ -8,6 +8,7 @@
 
 import AVFoundation
 import UIKit
+import SwiftUI
 
 // MARK: - BaseViewController
 // @MainActor đảm bảo mọi UI update đều chạy trên Main Thread tự động
@@ -728,5 +729,30 @@ extension BaseViewController {
                 group.addTask { await task() }
             }
         }
+    }
+}
+
+// MARK: - BaseViewController + SwiftUI push helper
+extension BaseViewController {
+    /// Push một SwiftUI View từ UIKit
+    /// Ví dụ: pushSwiftUI(HistoryView(viewModel: vm))
+    func pushSwiftUI<Content: View>(
+        _ view: Content,
+        title: String? = nil,
+        animated: Bool = true
+    ) {
+        let hosting = HostingViewController(rootView: view, navigationTitle: title)
+        push(hosting, animated: animated)
+    }
+
+    /// Present SwiftUI View dạng modal
+    func presentSwiftUI<Content: View>(
+        _ view: Content,
+        style: UIModalPresentationStyle = .automatic,
+        animated: Bool = true
+    ) async {
+        let hosting = HostingViewController(rootView: view)
+        hosting.modalPresentationStyle = style
+        await presentModal(hosting, style: style, animated: animated)
     }
 }

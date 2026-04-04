@@ -138,7 +138,7 @@ final class SettingsViewController: BaseViewController {
     private func buildHelpSection() {
         let card = makeCard()
         let title = makeSectionTitle("Help")
-        title.applyAccentColor()  // reactive màu accent
+        title.applyThemeColor()  // reactive màu theme
         card.addArrangedSubview(title)
         
         let view = UIView()

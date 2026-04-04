@@ -7,9 +7,9 @@
 
 import UIKit
 extension UIView {
-    /// Gán màu accent hiện tại, tự động cập nhật khi theme đổi
-    /// Ví dụ: myButton.applyAccentBackground()
-    func applyAccentBackground() {
+    /// Gán màu theme hiện tại, tự động cập nhật khi theme đổi
+    /// Ví dụ: myButton.applyThemeBackground()
+    func applyThemeBackground() {
         //backgroundColor = ThemeManager.shared.themeColor
         NotificationCenter.default.addObserver(
             forName: .themeDidChange,
@@ -20,7 +20,7 @@ extension UIView {
         }
     }
 
-    func applyAccentTint() {
+    func applyThemeTint() {
         if let iv = self as? UIImageView {
             iv.tintColor = ThemeManager.shared.themeColor
         } else {
@@ -56,7 +56,7 @@ extension UIView {
 }
 
 extension UILabel {
-    func applyAccentColor() {
+    func applyThemeColor() {
         textColor = ThemeManager.shared.themeColor
         NotificationCenter.default.addObserver(
             forName: .themeDidChange,

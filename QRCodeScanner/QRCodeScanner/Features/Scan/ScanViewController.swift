@@ -160,7 +160,7 @@ class ScanViewController: BaseViewController {
     }
     
     override func applyNewTheme(color: UIColor) {
-        self.scanOverlayView.accentColor = color
+        self.scanOverlayView.themeColor = color
         self.zoomSlider.minimumTrackTintColor = color
         zoomSlider.setThumbImage(makeSliderThumb(), for: .normal)
     }

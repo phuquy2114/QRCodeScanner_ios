@@ -46,16 +46,6 @@ final class FeedbackViewModel: BaseViewModel {
     
     // MARK: - Submit
     var isFormValid: Bool {
-        let a1 = !title.trimmingCharacters(in: .whitespaces).isEmpty
-        let a2 = !description.trimmingCharacters(in: .whitespaces).isEmpty
-        let a3 = titleError == nil
-        let a4 = descriptionError == nil
-        let a5: String = title
-        let a6: String  = description
-        
-        
-        print("titleError \(title == "" ? 1 : 2)")
-        print("titleError \(description == "" ? 1 : 2)")
         return !title.trimmingCharacters(in: .whitespaces).isEmpty &&
         !description.trimmingCharacters(in: .whitespaces).isEmpty &&
         titleError == nil && descriptionError == nil
@@ -103,8 +93,6 @@ final class FeedbackViewModel: BaseViewModel {
             }
             items[index].isSelected.toggle()
             title = items[index].title
-            print("titleError1 \(title == "" ? 1 : 2)")
-            let b = self.title
             return
         }
         

@@ -16,12 +16,12 @@ class CreateQRCodeCollectionViewCell: BaseCollectionViewCell {
     @IBOutlet weak var outlineView: UIView!
     @IBOutlet weak var icon: UIImageView!
     
-    var accentColor: UIColor = ThemeManager.shared.themeColor {
+    var themeColor: UIColor = ThemeManager.shared.themeColor {
         didSet {
             setNeedsDisplay()
-            smallTitle.backgroundColor = accentColor
-            icon.tintColor = accentColor
-            outlineView.layer.borderColor = accentColor.cgColor
+            smallTitle.backgroundColor = themeColor
+            icon.tintColor = themeColor
+            outlineView.layer.borderColor = themeColor.cgColor
         }
     }
         
@@ -50,16 +50,16 @@ class CreateQRCodeCollectionViewCell: BaseCollectionViewCell {
         
         outlineView.backgroundColor = .clear
         outlineView.layer.cornerRadius = 6
-        outlineView.layer.borderColor = accentColor.cgColor
+        outlineView.layer.borderColor = themeColor.cgColor
         outlineView.layer.borderWidth = 1
         
-        icon.tintColor = accentColor
+        icon.tintColor = themeColor
         
         bigTitle.textColor = .white
         bigTitle.font = .systemFont(ofSize: 18)
         
         smallTitle.textColor = .black
-        smallTitle.backgroundColor = accentColor
+        smallTitle.backgroundColor = themeColor
         smallTitle.font = .systemFont(ofSize: 10)
         smallTitle.textInsets = UIEdgeInsets(top: 2, left: 4, bottom: 2, right: 4)
         // Chỉnh bo góc 4 và bắt buộc phải có clipsToBounds = true để cắt màu nền
@@ -67,7 +67,7 @@ class CreateQRCodeCollectionViewCell: BaseCollectionViewCell {
         smallTitle.layer.cornerRadius = 4
         smallTitle.textAlignment = .center
         smallTitle.observerNewTheme { [weak self] color in
-            self?.accentColor = color
+            self?.themeColor = color
         }
     }
     
