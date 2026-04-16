@@ -34,7 +34,7 @@ struct CameraToolbar: View {
         .padding(.vertical, 16)
         .background(
             RoundedRectangle(cornerRadius: 18)
-                .fill(Color(white: 0.35))
+                .fill(Color(white: 0.4))
         )
     }
     

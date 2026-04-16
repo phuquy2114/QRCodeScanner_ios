@@ -23,10 +23,8 @@ struct ButtonTheme: View {
                 .font(.title2)
                 .fontWeight(.semibold)
                 .frame(maxWidth: .infinity, minHeight: 52, maxHeight: 52)
-                // Đổi màu chữ theo trạng thái nếu không truyền titleColor
-                .foregroundStyle(titleColor ?? (isEnabled ? .black : .white))
+                .foregroundStyle(titleColor ?? .black)
         }
-        // Đổi màu background theo trạng thái isEnabled
         .background(isEnabled ? theme.accent : Color.gray, in: .rect(cornerRadius: radius ?? 12))
         .clipShape(.rect(cornerRadius: radius ?? 12))
         .contentShape(Rectangle())
@@ -36,7 +34,7 @@ struct ButtonTheme: View {
 
 #Preview {
     ButtonTheme(
-        title: "STILL STILLSTILLSTILL",
+        title: "STILL",
         titleColor: .black,
         onTap: {
 

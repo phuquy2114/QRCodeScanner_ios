@@ -22,19 +22,19 @@ struct CreateQRView: View {
     var body: some View {
         NavigationStack {
             VStack {
-                Spacer().frame(height: 16)
+                Spacer().frame(height: 8)
                 buildSection(
                     title: "History",
                     icon: "clock.arrow.circlepath",
                     showScreen: $onShowHistory
                 )
-                Spacer().frame(height: 16)
+                Spacer().frame(height: 12)
                 buildSection(
                     title: "Clipboard",
                     icon: "clipboard.fill",
                     showScreen: $onShowClipboard
                 )
-                Spacer().frame(height: 16)
+                Spacer().frame(height: 12)
                 ScrollView {
                     LazyVGrid(columns: columns, spacing: 16) {
                         ForEach(CreateQR.allCases, id: \.self) { item in

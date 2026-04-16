@@ -6,195 +6,204 @@
 //
 
 import AVFoundation
-import UIKit
 
-final class CameraService: NSObject {
+actor CameraService {
 
     // MARK: - Public
 
-    let session = AVCaptureSession()
+    // nonisolated(unsafe): CameraPreviewView đọc trực tiếp, không qua await.
+    // An toàn vì session chỉ được mutate bên trong actor.
+    nonisolated(unsafe) let session = AVCaptureSession()
 
-    var onQRCodeDetected: ((Result<String, AppError>) -> Void)?
+    // AsyncStream là Sendable → nonisolated let hợp lệ không cần unsafe.
+    nonisolated let detectionStream: AsyncStream<Result<String, AppError>>
 
-    private(set) var currentPosition: AVCaptureDevice.Position = .back
+    private(set) var position: AVCaptureDevice.Position = .back
 
     // MARK: - Private
 
-    private var videoInput: AVCaptureDeviceInput?
-    private let metadataOutput = AVCaptureMetadataOutput()
-    private let sessionQueue = DispatchQueue(label: "camera.session.queue")
+    private let output = AVCaptureMetadataOutput()
+    private let delegate: MetadataDelegate
 
-    // MARK: - Setup
+    private var currentInput: AVCaptureDeviceInput?
+    private var configured = false
 
-    private var isConfigured = false
+    // MARK: - Init
 
-    /// Async — không bao giờ block main thread
-    func configure(completion: @escaping (Result<Void, AppError>) -> Void) {
-        guard !isConfigured else {
-            completion(.success(()))
-            return
-        }
-        sessionQueue.async { [weak self] in
-            guard let self else { return }
-            do {
-                try self.setupSession()
-                self.isConfigured = true
-                completion(.success(()))
-            } catch {
-                completion(.failure(error as? AppError ?? .cameraUnavailable))
-            }
-        }
+    init() {
+        delegate = MetadataDelegate()
+        // AsyncStream(_ build:) closure chạy synchronously →
+        // không phải @Sendable @escaping, capture an toàn.
+        var cont: AsyncStream<Result<String, AppError>>.Continuation!
+        detectionStream = AsyncStream { cont = $0 }
+        // MetadataDelegate là @unchecked Sendable, KHÔNG phải @MainActor
+        // nên gán ở đây hợp lệ.
+        delegate.continuation = cont
     }
 
-    private func setupSession() throws {
+    // MARK: - Configure
+
+    func configure() async throws {
+        guard !configured else { return }
+
+        // AVCaptureDevice.DiscoverySession và AVCaptureDeviceInput.init
+        // là @MainActor trong Xcode 16 SDK → hop sang MainActor đúng chỗ.
+        let pos = position
+        let input = try await MainActor.run {
+            let devices = AVCaptureDevice.DiscoverySession(
+                deviceTypes: [
+                    .builtInTripleCamera, .builtInDualWideCamera,
+                    .builtInWideAngleCamera,
+                ],
+                mediaType: .video,
+                position: pos
+            ).devices
+            guard let device = devices.first else {
+                throw AppError.cameraUnavailable
+            }
+            return try AVCaptureDeviceInput(device: device)
+        }
+
+        // AVCaptureSession methods KHÔNG phải @MainActor —
+        // thread-safe, gọi thẳng trên actor executor.
         session.beginConfiguration()
+        defer { session.commitConfiguration() }
         session.sessionPreset = .high
 
-        guard
-            let device = bestCamera(position: .back),
-            let input = try? AVCaptureDeviceInput(device: device),
-            session.canAddInput(input)
-        else {
-            session.commitConfiguration()
+        guard session.canAddInput(input) else {
             throw AppError.cameraUnavailable
         }
         session.addInput(input)
-        videoInput = input
+        currentInput = input
 
-        guard session.canAddOutput(metadataOutput) else {
-            session.commitConfiguration()
+        guard session.canAddOutput(output) else {
             throw AppError.cameraUnavailable
         }
-        session.addOutput(metadataOutput)
-        metadataOutput.setMetadataObjectsDelegate(self, queue: .main)
-        metadataOutput.metadataObjectTypes = [.qr, .ean13, .ean8, .code128, .code39, .pdf417, .aztec]
+        session.addOutput(output)
+        output.setMetadataObjectsDelegate(delegate, queue: .main)
+        output.metadataObjectTypes = [
+            .qr, .ean13, .ean8, .code128, .code39, .pdf417, .aztec,
+        ]
 
-        session.commitConfiguration()
+        configured = true
     }
 
-    // MARK: - Session lifecycle
+    // MARK: - Lifecycle
+    // AVCaptureSession.startRunning / stopRunning KHÔNG phải @MainActor.
+
     func start() {
-        // Bỏ [weak self] để đảm bảo session được start trọn vẹn trong background queue
-        sessionQueue.async {
-            if !self.session.isRunning {
-                self.session.startRunning()
-            }
-        }
+        guard !session.isRunning else { return }
+        session.startRunning()
     }
 
     func stop() {
-        // Quan trọng: KHÔNG dùng [weak self] ở đây.
-        // Giữ strong self đảm bảo session được stop xong xuôi trên background queue
-        // rồi `CameraService` mới được deinit ở background, giúp Main Thread mượt mà.
-        sessionQueue.async {
-            if self.session.isRunning {
-                self.session.stopRunning()
-            }
-        }
-    }
-    
-    /*
-    func start() {
-        sessionQueue.async { [weak self] in
-            guard let self, !self.session.isRunning else { return }
-            self.session.startRunning()
-        }
+        guard session.isRunning else { return }
+        session.stopRunning()
     }
 
-    func stop() {
-        sessionQueue.async { [weak self] in
-            guard let self, self.session.isRunning else { return }
-            self.session.stopRunning()
-        }
-    }
-     */
-    
     // MARK: - Flash
-    func setFlash(_ on: Bool) {
-        guard
-            let device = videoInput?.device,
-            device.hasTorch,
-            (try? device.lockForConfiguration()) != nil
-        else { return }
+    // AVCaptureDevice config methods là @MainActor → MainActor.run.
 
-        device.torchMode = on ? .on : .off
-        device.unlockForConfiguration()
+    func setFlash(_ on: Bool) async throws {
+        guard let device = currentInput?.device else {
+            throw AppError.cameraUnavailable
+        }
+        try await MainActor.run {
+            guard device.hasTorch else { return }
+            try device.lockForConfiguration()
+            device.torchMode = on ? .on : .off
+            device.unlockForConfiguration()
+        }
     }
 
-    // MARK: - Flip camera
+    // MARK: - Flip
 
-    func flipCamera() {
-        let nextPosition: AVCaptureDevice.Position = currentPosition == .back ? .front : .back
-        guard let newDevice = bestCamera(position: nextPosition),
-              let newInput = try? AVCaptureDeviceInput(device: newDevice) else { return }
+    func flip() async throws {
+        let next: AVCaptureDevice.Position = position == .back ? .front : .back
 
-        sessionQueue.async { [weak self] in
-            guard let self else { return }
-            self.session.beginConfiguration()
-
-            if let old = self.videoInput {
-                self.session.removeInput(old)
+        let newInput = try await MainActor.run {
+            let devices = AVCaptureDevice.DiscoverySession(
+                deviceTypes: [
+                    .builtInTripleCamera, .builtInDualWideCamera,
+                    .builtInWideAngleCamera,
+                ],
+                mediaType: .video,
+                position: next
+            ).devices
+            guard let device = devices.first else {
+                throw AppError.cameraUnavailable
             }
-
-            if self.session.canAddInput(newInput) {
-                self.session.addInput(newInput)
-                self.videoInput = newInput
-                self.currentPosition = nextPosition
-            }
-
-            self.session.commitConfiguration()
+            return try AVCaptureDeviceInput(device: device)
         }
+
+        session.beginConfiguration()
+        defer { session.commitConfiguration() }
+
+        if let old = currentInput { session.removeInput(old) }
+        guard session.canAddInput(newInput) else {
+            throw AppError.cameraUnavailable
+        }
+
+        session.addInput(newInput)
+        currentInput = newInput
+        position = next
     }
 
     // MARK: - Zoom
+    // AVCaptureDevice zoom properties là @MainActor → MainActor.run.
 
-    /// zoom: 1.0 → 5.0
-    func setZoom(_ factor: CGFloat) {
-        guard
-            let device = videoInput?.device,
-            (try? device.lockForConfiguration()) != nil
-        else { return }
-
-        let clamped = max(device.minAvailableVideoZoomFactor,
-                         min(factor, device.maxAvailableVideoZoomFactor))
-        device.videoZoomFactor = clamped
-        device.unlockForConfiguration()
-    }
-
-    // MARK: - Helpers
-
-    private func bestCamera(position: AVCaptureDevice.Position) -> AVCaptureDevice? {
-        let types: [AVCaptureDevice.DeviceType] = [
-            .builtInTripleCamera,
-            .builtInDualWideCamera,
-            .builtInWideAngleCamera
-        ]
-        let session = AVCaptureDevice.DiscoverySession(
-            deviceTypes: types,
-            mediaType: .video,
-            position: position
-        )
-        return session.devices.first
+    func setZoom(_ factor: CGFloat) async throws {
+        guard let device = currentInput?.device else {
+            throw AppError.cameraUnavailable
+        }
+        try await MainActor.run {
+            try device.lockForConfiguration()
+            device.videoZoomFactor = min(
+                max(factor, device.minAvailableVideoZoomFactor),
+                device.maxAvailableVideoZoomFactor
+            )
+            device.unlockForConfiguration()
+        }
     }
 }
 
-// MARK: - AVCaptureMetadataOutputObjectsDelegate
+// MARK: - MetadataDelegate
+//
+// Tách NSObject riêng vì actor không conform được ObjC protocol.
+//
+// @unchecked Sendable: delegate được share qua actor boundary.
+// An toàn vì:
+//   · continuation set đúng 1 lần trong actor init (synchronous)
+//   · continuation.yield chỉ gọi từ main queue (queue: .main)
+//
+// extension riêng + nonisolated trên method:
+//   override @MainActor inference mà Swift 6 tự gán cho conformance
+//   với AVCaptureMetadataOutputObjectsDelegate.
 
-extension CameraService: AVCaptureMetadataOutputObjectsDelegate {
-    func metadataOutput(
+private final class MetadataDelegate: NSObject, @unchecked Sendable {
+    // Đánh dấu biến này để actor có thể cập nhật trong hàm init an toàn khi class bị gán là @MainActor.
+    nonisolated(unsafe) var continuation:
+        AsyncStream<Result<String, AppError>>.Continuation?
+
+    // Ghi đè init thành nonisolated để có thể khởi tạo đồng bộ từ bên trong Actor.
+    nonisolated override init() {
+        super.init()
+    }
+}
+
+extension MetadataDelegate: AVCaptureMetadataOutputObjectsDelegate {
+    
+    nonisolated func metadataOutput(
         _ output: AVCaptureMetadataOutput,
-        didOutput metadataObjects: [AVMetadataObject],
+        didOutput objects: [AVMetadataObject],
         from connection: AVCaptureConnection
     ) {
         guard
-            let object = metadataObjects.first as? AVMetadataMachineReadableCodeObject,
-            let value = object.stringValue,
+            let obj = objects.first as? AVMetadataMachineReadableCodeObject,
+            let value = obj.stringValue,
             !value.isEmpty
-        else {
-            onQRCodeDetected?(.failure(.invalidQRPayload))
-            return
-        }
+        else { return }
 
-        onQRCodeDetected?(.success(value))
+        continuation?.yield(.success(value))
     }
 }

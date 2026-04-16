@@ -107,3 +107,5 @@ fastlane/test_output/
 *.swp
 *.lock
 !Podfile.lock
+*.xcworkspace
+*.xcodeproj/project.xcworkspace
