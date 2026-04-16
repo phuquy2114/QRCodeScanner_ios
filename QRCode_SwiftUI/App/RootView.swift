@@ -16,7 +16,7 @@ enum AppState {
 
 struct RootView: View {
 
-    @State var appState: AppState = .splash
+    @State private var appState: AppState = .splash
 
     var body: some View {
         Group {
@@ -33,7 +33,7 @@ struct RootView: View {
 
     private func startAppLoading() {
         Task { @MainActor in
-            try await Task.sleep(nanoseconds: 100_000_000)
+            try await Task.sleep(for: .seconds(1))
             withAnimation(.easeInOut(duration: 0.5)) {
                 appState = .main
             }

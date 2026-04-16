@@ -9,7 +9,7 @@ import SwiftUI
 
 struct SettingsView: View {
     @EnvironmentObject var theme: ThemeManager
-    @StateObject var viewModel = SettingsViewModel()
+    @StateObject private var viewModel = SettingsViewModel()
     @State private var showFAQ = false
     @State private var showFeedback = false
 

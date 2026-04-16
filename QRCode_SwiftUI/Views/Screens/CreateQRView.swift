@@ -9,7 +9,6 @@ import SwiftUI
 
 struct CreateQRView: View {
     @EnvironmentObject var theme: ThemeManager
-
     @State private var onShowHistory = false
     @State private var onShowClipboard = false
 
@@ -22,7 +21,7 @@ struct CreateQRView: View {
     var body: some View {
         NavigationStack {
             VStack {
-                Spacer().frame(height: 8)
+                Spacer().frame(height: 12)
                 buildSection(
                     title: "History",
                     icon: "clock.arrow.circlepath",
@@ -34,28 +33,29 @@ struct CreateQRView: View {
                     icon: "clipboard.fill",
                     showScreen: $onShowClipboard
                 )
-                Spacer().frame(height: 12)
+                Spacer().frame(height: 16)
                 ScrollView {
-                    LazyVGrid(columns: columns, spacing: 16) {
+                    LazyVGrid(columns: columns, spacing: 12) {
                         ForEach(CreateQR.allCases, id: \.self) { item in
                             CreateItemCell(onTap: { object in
                                 handleOnTap(item: object)
                             }, item: item)
                         }
                     }
-                }.padding(.horizontal, 16)
+                }
+                .scrollIndicators(.hidden)
+                .padding(.horizontal, 16)
 
-                
             }
             .scrollContentBackground(.hidden)
             .marginBottom()
             .background(Color.black)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .navigationDestination(isPresented: $onShowHistory) {
-                PlaceholderView(title: "History")
+                EmptyView(title: "History")
             }
             .navigationDestination(isPresented: $onShowClipboard) {
-                PlaceholderView(title: "clip")
+                EmptyView(title: "clip")
             }
         }
 
@@ -68,21 +68,23 @@ struct CreateQRView: View {
     ) -> some View {
         HStack(spacing: 16) {
             Image(systemName: icon)
-                .font(.system(size: 24, weight: .bold))
+                .font(.title2)
+                .fontWeight(.semibold)
                 .frame(width: 24, height: 24)
                 .foregroundStyle(theme.accent)
-                .scaledToFit()
-
+                .scaledToFill()
+            
             Text(title)
                 .foregroundStyle(.white)
-                .font(.system(size: 21))
+                .font(.title3)
 
             Spacer()
 
             Image(systemName: "chevron.right")
-                .font(.system(size: 18))
+                .font(.headline)
                 .frame(width: 18, height: 18)
                 .foregroundStyle(.white)
+                .scaledToFill()
         }
         .padding(16)
         .background(Color.backgroundColor)
@@ -105,7 +107,7 @@ struct CreateItemCell: View {
     let item: CreateQR
 
     var body: some View {
-        VStack(spacing: 8) {
+        VStack {
             ZStack(alignment: .top) {
                 ZStack(alignment: .center) {
                     if let icon = item.icon() {
@@ -115,7 +117,7 @@ struct CreateItemCell: View {
                             .foregroundStyle(theme.accent)
                     }
                 }
-                .padding(20)
+                .padding(18)
                 .frame(maxWidth: .infinity)
                 .aspectRatio(1, contentMode: .fit)
                 .background(
@@ -131,7 +133,9 @@ struct CreateItemCell: View {
                     .lineLimit(1)
                     .minimumScaleFactor(0.9)
                     .padding(.horizontal, 4)
-                    .background(RoundedRectangle(cornerRadius: 4).fill(theme.accent))
+                    .background(
+                        RoundedRectangle(cornerRadius: 4).fill(theme.accent)
+                    )
                     .frame(maxWidth: 56)
                     .alignmentGuide(.top) { dimen in
                         dimen[VerticalAlignment.center]
@@ -141,13 +145,12 @@ struct CreateItemCell: View {
             Text(item.title())
                 .foregroundStyle(.white)
                 .lineLimit(1)
-                .font(.title3)
+                .font(.headline)
         }
-
         .frame(maxWidth: .infinity)
         .aspectRatio(1, contentMode: .fit)
         .padding(.bottom, 8)
-        .padding(.top, 22)
+        .padding(.top, 16)
         .padding(.horizontal, 6)
         .background(
             RoundedRectangle(cornerRadius: 16)

@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct SplashView: View {
-    @State var color: Color = .yellow
+    private let color: Color = .yellow
 
     var body: some View {
         ZStack {

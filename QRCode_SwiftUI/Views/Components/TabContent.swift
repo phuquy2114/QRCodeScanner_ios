@@ -13,22 +13,11 @@ struct TabContent: View {
     var body: some View {
         switch selectedTab {
         case .scan: ScanView()
-        case .history: PlaceholderView(title: "History")
+        case .history: EmptyView(title: selectedTab.title)
         case .create: CreateQRView()
-        case .favorite: PlaceholderView(title: "Favorite")
+        case .favorite: EmptyView(title: selectedTab.title)
         case .settings: SettingsView()
         }
     }
 }
 
-struct PlaceholderView: View {
-    let title: String
-    var body: some View {
-        ZStack {
-            Color.black
-            Text(title)
-                .foregroundStyle(.white)
-                .font(.title2)
-        }
-    }
-}
