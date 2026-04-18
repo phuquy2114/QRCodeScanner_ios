@@ -20,7 +20,7 @@ struct ButtonTheme: View {
     var body: some View {
         Button(action: onTap) {
             Text(title)
-                .font(.title2)
+                .font(.title3)
                 .fontWeight(.semibold)
                 .frame(maxWidth: .infinity, minHeight: 52, maxHeight: 52)
                 .foregroundStyle(titleColor ?? .black)

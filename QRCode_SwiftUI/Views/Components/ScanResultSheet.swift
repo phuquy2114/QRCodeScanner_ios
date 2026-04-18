@@ -9,6 +9,7 @@ import SwiftUI
 
 // MARK: - Scan Result Sheet
 struct ScanResultSheet: View {
+    @EnvironmentObject var theme: ThemeManager
     let result: String
     let onDismiss: () -> Void
 
@@ -22,7 +23,7 @@ struct ScanResultSheet: View {
             VStack(spacing: 24) {
                 Image(systemName: "qrcode.viewfinder")
                     .font(.system(size: 56))
-                    .foregroundStyle(.yellow)
+                    .foregroundStyle(theme.accent)
                     .padding(.top, 32)
 
                 VStack(spacing: 8) {
@@ -65,14 +66,15 @@ struct ActionButton: View {
     let title: String
     let icon: String
     let action: () -> Void
-
+    @EnvironmentObject var theme: ThemeManager
+    
     var body: some View {
         Button(action: action) {
             Label(title, systemImage: icon)
                 .font(.system(size: 15, weight: .semibold))
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 14)
-                .background(Color.yellow)
+                .background(theme.accent)
                 .foregroundStyle(.black)
                 .clipShape(.rect(cornerRadius: 12))
         }

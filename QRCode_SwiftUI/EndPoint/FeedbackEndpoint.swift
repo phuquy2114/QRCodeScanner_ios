@@ -11,7 +11,7 @@ enum FeedbackEndpoint: APIEndpoint {
     var path: String {
         switch self {
         case .submitFeedback:
-            ""
+            "/feedback"
         }
     }
 

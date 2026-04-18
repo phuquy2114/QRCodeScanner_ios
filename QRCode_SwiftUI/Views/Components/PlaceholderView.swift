@@ -1,5 +1,5 @@
 //
-//  EmptyView.swift
+//  PlaceholderView.swift
 //  QRCode_SwiftUI
 //
 //  Created by Ngo Nghia on 16/4/26.
@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct EmptyView: View {
+struct PlaceholderView: View {
     let title: String
     var body: some View {
         ZStack {

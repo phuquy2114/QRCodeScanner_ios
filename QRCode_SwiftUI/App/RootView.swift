@@ -19,16 +19,17 @@ struct RootView: View {
     @State private var appState: AppState = .splash
 
     var body: some View {
-        Group {
+        ZStack {
             switch appState {
             case .splash:
-                SplashView().onAppear {
+                SplashView().transition(.opacity).onAppear {
                     startAppLoading()
                 }
             case .main:
                 ContentView().transition(.opacity)
             }
         }
+        .animation(.easeInOut(duration: 0.5), value: appState)
     }
 
     private func startAppLoading() {

@@ -19,28 +19,16 @@ struct APIResponse<T: Decodable>: Decodable {
 
     var serverMessage: String { message ?? "" }
     
-    func isHaveData() -> Bool {
-        
-        if data != nil && success {
-            return true
-        }
-        
-        return false
-
-    }
+    var hasData: Bool { data != nil && success }
+    var isEmpty: Bool { !hasData }
     
-    func isEmptyData() -> Bool {
-        
-        if data == nil || success == false {
-            return true
-        }
-        
-        return false
-    }
-    
-    func handleResponse(onSuccsess: (T) -> Void, onFail: (String) -> Void) {
-        if isHaveData() {
-            onSuccsess(data!)
+    func handleResponse(onSuccess: (T) -> Void, onFail: (String) -> Void) {
+        if hasData {
+            guard let data = data else {
+                onFail(message ?? "Unknown error")
+                return
+            }
+            onSuccess(data)
         } else {
             onFail(message ?? "Unknown error")
         }

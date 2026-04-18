@@ -46,10 +46,12 @@ struct FAQView: View {
             Spacer().frame(height: 16)
             
             List {
-                ForEach(items.indices, id: \.self) { index in
-                    FAQItemCell(item: items[index])
+                ForEach(items) { item in
+                    FAQItemCell(item: item)
                         .listRowBackground(Color.clear)
-                        .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
+                        .listRowInsets(
+                            EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0)
+                        )
                         
                 }
             }
@@ -67,7 +69,8 @@ struct FAQView: View {
         .toolbar {
             ToolbarItem(placement: .principal) {
                 Text("FAQ")
-                    .font(.system(size: 24, weight: .bold)) // BẠN CHỈNH CỠ CHỮ TẠI ĐÂY
+                    .font(.title2)
+                    .fontWeight(.bold)
                     .foregroundStyle(.white)
             }
         }

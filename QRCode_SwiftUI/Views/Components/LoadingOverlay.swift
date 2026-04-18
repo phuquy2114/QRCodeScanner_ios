@@ -16,7 +16,7 @@ struct LoadingOverlay: View {
             Color.black.opacity(0.5).ignoresSafeArea()
             VStack(spacing: 12) {
                 ProgressView()
-                    .tint(.yellow)
+                    .tint(.white)
                     .scaleEffect(1.4)
                 Text(message)
                     .font(.subheadline)

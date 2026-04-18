@@ -9,6 +9,7 @@ import Combine
 import Vision
 import _PhotosUI_SwiftUI
 
+@MainActor
 final class ScanViewModel: BaseViewModel {
 
     // MARK: - Published
@@ -132,14 +133,16 @@ final class ScanViewModel: BaseViewModel {
     }
 
     private func scanFromPickedPhoto() async throws {
+       
         guard
             let item = selectedPhotoItem,
-            let data = try? await item.loadTransferable(type: Data.self)
-        else { throw AppError.photoLoadFailed }
-
-        guard let cgImage = UIImage(data: data)?.cgImage
-        else { throw AppError.photoLoadFailed }
-
+            let data = try? await item.loadTransferable(type: Data.self),
+            let cgImage = UIImage(data: data)?.cgImage
+        else {
+            throw AppError.photoLoadFailed
+        }
+        
+        /*
         // Vision synchronous + CPU heavy → global queue tránh block
         let payload: String = try await withCheckedThrowingContinuation {
             continuation in
@@ -164,6 +167,26 @@ final class ScanViewModel: BaseViewModel {
             }
         }
         handleDetected(payload)
+        */
+        
+        let request = VNDetectBarcodesRequest()
+        let handler = VNImageRequestHandler(cgImage: cgImage, options: [:])
+        // iOS 16+: perform trả về trực tiếp, không cần continuation
+        do {
+            try handler.perform([request])  // Không block main thread
+        } catch {
+            throw AppError.photoScanFailed
+        }
+
+        guard
+            let obs = request.results?.first as? VNBarcodeObservation,
+            let value = obs.payloadStringValue,
+            !value.isEmpty
+        else {
+            throw AppError.noQRCodeFound
+        }
+
+        handleDetected(value)
     }
 
     // MARK: - Result

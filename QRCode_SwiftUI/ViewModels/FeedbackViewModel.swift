@@ -8,17 +8,22 @@
 import Combine
 import SwiftUI
 
+@MainActor
 class FeedbackViewModel: BaseViewModel {
     let maxImages = 3
     let maxDescriptionLength = 500
 
-    @Published var attachFiles: [Image] = []
+    @Published var attachFiles: [UIImage] = []
     @Published var problemItems = [
-        ("scan not working", false),
-        ("ads", false),
-        ("need more information affter scanning", false),
-        ("other", false),
+        ProblemItem(title: "scan not working", isSelected: false),
+        ProblemItem(title: "ads", isSelected: false),
+        ProblemItem(
+            title: "need more information after scanning",
+            isSelected: false
+        ),
+        ProblemItem(title: "other", isSelected: false),
     ]
+    
     @Published var typeProblem: String = ""
     @Published var description: String = ""
     @Published var isFormValid: Bool = false
@@ -38,10 +43,10 @@ class FeedbackViewModel: BaseViewModel {
     }
 
     func onTapItemProblem(index: Int) {
-        typeProblem = problemItems[index].0
+        typeProblem = problemItems[index].title
 
         for position in problemItems.indices {
-            problemItems[position].1 = position == index
+            problemItems[position].isSelected = position == index
         }
     }
 
@@ -65,3 +70,4 @@ class FeedbackViewModel: BaseViewModel {
     }
 
 }
+

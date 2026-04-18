@@ -52,10 +52,10 @@ struct CreateQRView: View {
             .background(Color.black)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .navigationDestination(isPresented: $onShowHistory) {
-                EmptyView(title: "History")
+                PlaceholderView(title: "History")
             }
             .navigationDestination(isPresented: $onShowClipboard) {
-                EmptyView(title: "clip")
+                PlaceholderView(title: "clip")
             }
         }
 

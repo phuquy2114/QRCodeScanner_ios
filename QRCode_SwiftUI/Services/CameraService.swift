@@ -10,7 +10,6 @@ import AVFoundation
 actor CameraService {
 
     // MARK: - Public
-
     // nonisolated(unsafe): CameraPreviewView đọc trực tiếp, không qua await.
     // An toàn vì session chỉ được mutate bên trong actor.
     nonisolated(unsafe) let session = AVCaptureSession()
@@ -21,7 +20,6 @@ actor CameraService {
     private(set) var position: AVCaptureDevice.Position = .back
 
     // MARK: - Private
-
     private let output = AVCaptureMetadataOutput()
     private let delegate: MetadataDelegate
 
@@ -29,20 +27,14 @@ actor CameraService {
     private var configured = false
 
     // MARK: - Init
-
     init() {
-        delegate = MetadataDelegate()
-        // AsyncStream(_ build:) closure chạy synchronously →
-        // không phải @Sendable @escaping, capture an toàn.
-        var cont: AsyncStream<Result<String, AppError>>.Continuation!
-        detectionStream = AsyncStream { cont = $0 }
-        // MetadataDelegate là @unchecked Sendable, KHÔNG phải @MainActor
-        // nên gán ở đây hợp lệ.
-        delegate.continuation = cont
+        let del = MetadataDelegate()
+        // closure chạy synchronously → del.continuation được set trước khi AsyncStream init return
+        detectionStream = AsyncStream { del.continuation = $0 }
+        delegate = del
     }
 
     // MARK: - Configure
-
     func configure() async throws {
         guard !configured else { return }
 
@@ -90,7 +82,6 @@ actor CameraService {
 
     // MARK: - Lifecycle
     // AVCaptureSession.startRunning / stopRunning KHÔNG phải @MainActor.
-
     func start() {
         guard !session.isRunning else { return }
         session.startRunning()
@@ -103,7 +94,6 @@ actor CameraService {
 
     // MARK: - Flash
     // AVCaptureDevice config methods là @MainActor → MainActor.run.
-
     func setFlash(_ on: Bool) async throws {
         guard let device = currentInput?.device else {
             throw AppError.cameraUnavailable
@@ -117,7 +107,6 @@ actor CameraService {
     }
 
     // MARK: - Flip
-
     func flip() async throws {
         let next: AVCaptureDevice.Position = position == .back ? .front : .back
 
@@ -151,7 +140,6 @@ actor CameraService {
 
     // MARK: - Zoom
     // AVCaptureDevice zoom properties là @MainActor → MainActor.run.
-
     func setZoom(_ factor: CGFloat) async throws {
         guard let device = currentInput?.device else {
             throw AppError.cameraUnavailable
@@ -192,7 +180,6 @@ private final class MetadataDelegate: NSObject, @unchecked Sendable {
 }
 
 extension MetadataDelegate: AVCaptureMetadataOutputObjectsDelegate {
-    
     nonisolated func metadataOutput(
         _ output: AVCaptureMetadataOutput,
         didOutput objects: [AVMetadataObject],

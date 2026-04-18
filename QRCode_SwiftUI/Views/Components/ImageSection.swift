@@ -10,7 +10,7 @@ import _PhotosUI_SwiftUI
 
 struct ImageSection: View {
     @EnvironmentObject var theme: ThemeManager
-    @Binding var listImage: [Image]
+    @Binding var listImage: [UIImage]
     @State private var selectedItems: [PhotosPickerItem] = []
     
     let maxImages: Int
@@ -28,7 +28,7 @@ struct ImageSection: View {
             if !listImage.isEmpty {
                 ForEach(listImage.indices, id: \.self) { index in
                     ZStack(alignment: .topTrailing) {
-                        listImage[index]
+                        Image(uiImage: listImage[index])
                             .resizable()
                             .scaledToFill()
                             .frame(width: size.width, height: size.height)
@@ -77,7 +77,8 @@ struct ImageSection: View {
                            let uiImage = UIImage(data: data) {
                             // 2. Phải update mảng Image trên luồng chính (Main Thread)
                             await MainActor.run {
-                                listImage.append(Image(uiImage: uiImage))
+                                listImage.append(uiImage)
+                                selectedItems.removeAll()
                             }
                         }
                     }

@@ -11,12 +11,9 @@ import AudioToolbox
 
 @MainActor
 class SettingsViewModel: BaseViewModel {
-
-    private let soundManager = SoundManager()
     
     override init() {
         super.init()
-        
     }
     
     func onChangeToggle(item: SettingSound, value: Bool) {

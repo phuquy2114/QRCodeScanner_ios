@@ -48,7 +48,6 @@ struct TextInputTextEditor: View {
                         .lineLimit(1)
                         .background(Color.backgroundColor)
                         .font(.footnote)
-                        .foregroundStyle(.white.opacity(0.5))
                         .padding(.leading, 20)
                         .padding(.top , -8)
                     }
@@ -69,8 +68,6 @@ struct TextInputTextEditor: View {
                     .padding(.top, 14) // Căn chỉnh Y cho khớp với TextEditor (tuỳ chỉnh lại nếu cần)
                     .padding(.leading, 22) // Căn chỉnh X cho khớp với TextEditor đã có padding
                     .allowsHitTesting(false) // Bỏ qua tap để xuyên xuống TextEditor
-            } else {
-                
             }
         }
         .frame(maxWidth: .infinity)

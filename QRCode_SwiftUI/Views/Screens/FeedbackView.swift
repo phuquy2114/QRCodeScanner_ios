@@ -1,5 +1,5 @@
 //
-//  ProblemsView.swift
+//  FeedbackView.swift
 //  QRCode_SwiftUI
 //
 //  Created by Ngo Nghia on 8/4/26.
@@ -11,10 +11,7 @@ struct FeedbackView: View {
 
     @EnvironmentObject var theme: ThemeManager
     @StateObject private var viewModel = FeedbackViewModel()
-
-    @State private var text: String = "Describe your prolbem..."
         
-    
     var body: some View {
         ScrollView {
             Spacer().frame(height: 10)
@@ -28,18 +25,22 @@ struct FeedbackView: View {
                     Button {
                         viewModel.onTapItemProblem(index: index)
                     } label: {
-                        Text(viewModel.problemItems[index].0.uppercased())
+                        Text(viewModel.problemItems[index].title.uppercased())
                             .font(.headline)
                     }
                     .padding(12)
                     .foregroundStyle(
                         // Xoá dấu $ ở đây đi vì chúng ta chỉ đọc (Read) chứ không truyền tham chiếu
-                        viewModel.problemItems[index].1 ? .blue : .white
+                        viewModel.problemItems[index].isSelected ? .blue : .white
                     )
                     .clipShape(.rect(cornerRadius:16))
                     .overlay {
                         RoundedRectangle(cornerRadius: 16)
-                            .stroke(viewModel.problemItems[index].1 ? .blue : .white, lineWidth: 1)
+                            .stroke(
+                                viewModel
+                                    .problemItems[index].isSelected ? .blue : .white,
+                                lineWidth: 1
+                            )
                     }
                 }
             }

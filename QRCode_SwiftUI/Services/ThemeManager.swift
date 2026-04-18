@@ -34,44 +34,9 @@ final class ThemeManager: ObservableObject {
     }
 }
 
-// MARK: - Environment Key
-private struct ThemeKey: EnvironmentKey {
-    static let defaultValue: ThemeManager = .shared
-}
-
-extension EnvironmentValues {
-    var theme: ThemeManager {
-        get { self[ThemeKey.self] }
-        set { self[ThemeKey.self] = newValue }
-    }
-}
-
 struct ThemeTintModifier: ViewModifier {
     @EnvironmentObject var theme: ThemeManager
     func body(content: Content) -> some View {
         content.tint(theme.accent)
-    }
-}
-
-
-enum ThemeColor: String, CaseIterable, Codable  {
-
-    case yellow, blue, green, orange, red
-    
-    var displayName: String { rawValue.capitalized }
-    
-    func color() -> Color {
-        switch self {
-        case .yellow:
-            return Color(hex: "#FFBF1A")
-        case .blue:
-            return Color(hex: "#3B8BFF")
-        case .green:
-            return Color(hex: "#2ECC71")
-        case .orange:
-            return Color(hex: "#FF6B35")
-        case .red:
-            return Color(hex: "#FF3B30")
-        }
     }
 }

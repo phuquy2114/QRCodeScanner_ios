@@ -109,9 +109,6 @@ struct SettingsView: View {
             .foregroundStyle(.white)
     }
 
-    private func sectionBackgroundColor() -> Color {
-        return Color.backgroundColor
-    }
 }
 
 // MARK: - Theme Row
@@ -203,54 +200,6 @@ struct HelpRow: View {
             }
         }.onTapGesture {
             self.onTap()
-        }
-    }
-}
-
-enum SettingSound: String, CaseIterable, Codable {
-    case vibrate, beep, autoFocus, touchFocus
-
-    var displayName: String {
-        switch self {
-        case .vibrate, .beep:
-            rawValue.capitalized
-        case .autoFocus:
-            "Auto Focus"
-        case .touchFocus:
-            "Touch Focus"
-        }
-    }
-
-}
-
-enum SettingHelp: String, CaseIterable, Codable {
-    case faq, feedback, rateUs, share, privacyPolicy, termsOfUse
-
-    var title: String {
-        switch self {
-        case .faq:
-            return rawValue.uppercased()
-        case .feedback, .share:
-            return rawValue.capitalized
-        case .rateUs:
-            return "Rate Us"
-        case .privacyPolicy:
-            return "Privacy Policy"
-        case .termsOfUse:
-            return "Terms of use"
-        }
-    }
-
-    var description: String? {
-        switch self {
-        case .faq, .privacyPolicy, .termsOfUse:
-            return nil
-        case .feedback:
-            return "Report bugs and tell us what to improve"
-        case .rateUs:
-            return "Your best reward to us."
-        case .share:
-            return "Share app with others"
         }
     }
 }
