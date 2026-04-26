@@ -13,9 +13,9 @@ struct TabContent: View {
     var body: some View {
         switch selectedTab {
         case .scan: ScanView()
-        case .history: PlaceholderView(title: selectedTab.title)
+        case .history: NavigationStack { HistoryView(isFavoriteOnly: false) }
         case .create: CreateQRView()
-        case .favorite: PlaceholderView(title: selectedTab.title)
+        case .favorite: NavigationStack { HistoryView(isFavoriteOnly: true) }
         case .settings: SettingsView()
         }
     }

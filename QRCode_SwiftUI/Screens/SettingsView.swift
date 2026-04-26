@@ -9,9 +9,13 @@ import SwiftUI
 
 struct SettingsView: View {
     @EnvironmentObject var theme: ThemeManager
+    @Environment(\.openURL) private var openURL
     @StateObject private var viewModel = SettingsViewModel()
     @State private var showFAQ = false
     @State private var showFeedback = false
+    @State private var showShare = false
+
+    @AppStorage("isOpenRateUs") private var isOpenRateUs: Bool = false
 
     private let spacingSection: CGFloat = 1
 
@@ -35,6 +39,13 @@ struct SettingsView: View {
             }
             .navigationDestination(isPresented: $showFeedback) {
                 FeedbackView()
+            }
+            .sheet(isPresented: $showShare) {
+                if let url = URL(string: viewModel.appLink) {
+                    ShareSheet(items: [url]).presentationDetents([
+                        .medium, .large,
+                    ])
+                }
             }
         }
     }
@@ -67,28 +78,28 @@ struct SettingsView: View {
     private var helpSection: some View {
         VStack(alignment: .leading) {
             Text("Help")
-                .font(.system(size: 22, weight: .semibold))
+                .font(.title3)
+                .fontWeight(.semibold)
                 .foregroundStyle(theme.accent)
                 .frame(maxWidth: .infinity, alignment: .leading)
 
             ForEach(SettingHelp.allCases, id: \.self) { item in
-                Divider().background(Color.white.opacity(0.8))
+                buildDivider()
                 HelpRow(
                     settingHelp: item,
-                    onTap: {
+                    isOpenRateUS: $isOpenRateUs, onTap: {
                         switch item {
                         case .faq:
                             showFAQ = true
                         case .feedback:
                             showFeedback = true
                         case .rateUs:
-                            print("")
+                            isOpenRateUs = true
+                            openLinkURL(link: viewModel.appLink)
                         case .share:
-                            print("")
-                        case .privacyPolicy:
-                            print("")
-                        case .termsOfUse:
-                            print("")
+                            showShare = true
+                        case .privacyPolicy, .termsOfUse:
+                            openLinkURL(link: viewModel.appPrivacyPolicy)
                         }
                     }
                 )
@@ -98,15 +109,22 @@ struct SettingsView: View {
     }
 
     private var versionSection: some View {
-        titleSection(title: "Version 1.3.2")
+        titleSection(title: viewModel.appVersion)
             .frame(maxWidth: .infinity, alignment: .leading)
             .configRow()
     }
 
     private func titleSection(title: String) -> some View {
         Text(title)
-            .font(.system(size: 22, weight: .semibold))
+            .font(.title3)
+            .fontWeight(.semibold)
             .foregroundStyle(.white)
+    }
+
+    private func openLinkURL(link: String) {
+        if let url = URL(string: link) {
+            openURL(url)
+        }
     }
 
 }
@@ -133,7 +151,7 @@ struct ThemeRow: View {
 
                 Text(option.displayName)
                     .foregroundStyle(.white)
-                    .font(.system(size: 18))
+                    .font(.headline)
 
                 Spacer()
             }
@@ -157,17 +175,19 @@ struct SoundRow: View {
 
             buildToggle(item: .vibrate, isOnValue: $vibrate)
 
-            Divider().background(Color.white.opacity(0.8))
+            buildDivider()
             buildToggle(item: .beep, isOnValue: $beep)
 
-            Divider().background(Color.white.opacity(0.8))
+            buildDivider()
             buildToggle(item: .autoFocus, isOnValue: $autoFocus)
 
-            Divider().background(Color.white.opacity(0.8))
+            buildDivider()
             buildToggle(item: .touchFocus, isOnValue: $touchFocus)
 
         }
     }
+    
+
 
     private func buildToggle(item: SettingSound, isOnValue: Binding<Bool>)
         -> some View
@@ -185,17 +205,27 @@ struct SoundRow: View {
 
 struct HelpRow: View {
     let settingHelp: SettingHelp
+    @Binding var isOpenRateUS: Bool
     var onTap: () -> Void
 
     var body: some View {
         VStack(alignment: .leading) {
-            Text(settingHelp.title)
-                .font(.system(size: 20, weight: .semibold))
-                .foregroundStyle(.white)
+            if settingHelp == .rateUs {
+                Text(isOpenRateUS ? "Rate (opened)" : settingHelp.title)
+                    .font(.title3)
+                    .fontWeight(.semibold)
+                    .foregroundStyle(.white)
+            } else {
+                Text(settingHelp.title)
+                    .font(.title3)
+                    .fontWeight(.semibold)
+                    .foregroundStyle(.white)
+            }
+
             if let description = settingHelp.description {
                 Spacer().frame(height: 4)
                 Text(description)
-                    .font(.system(size: 17, weight: .regular))
+                    .font(.headline)
                     .foregroundStyle(Color.white.opacity(0.8))
             }
         }.onTapGesture {
@@ -204,8 +234,8 @@ struct HelpRow: View {
     }
 }
 
-extension View {
-    fileprivate func configRow() -> some View {
+fileprivate extension View {
+     func configRow() -> some View {
         self.padding(16)
             .frame(maxWidth: .infinity)
             .listRowBackground(Color.clear)
@@ -216,4 +246,9 @@ extension View {
                 RoundedRectangle(cornerRadius: 16).fill(Color.backgroundColor)
             )
     }
+    
+    func buildDivider() -> some View {
+        Divider().background(Color.white.opacity(0.8))
+    }
+    
 }

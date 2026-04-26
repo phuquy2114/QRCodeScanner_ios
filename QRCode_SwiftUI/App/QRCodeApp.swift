@@ -12,6 +12,7 @@ struct QRCodeApp: App {
         WindowGroup {
             RootView()
                 .withTheme() // inject ThemeManager vào toàn bộ cây view
+                .environment(\.managedObjectContext, CoreDataManager.shared.context) // Inject CoreData Context
         }
     }
 }

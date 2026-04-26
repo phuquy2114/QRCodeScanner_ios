@@ -1,0 +1,229 @@
+//
+//  CreateQRView.swift
+//  QRCode_SwiftUI
+//
+//  Created by Ngo Nghia on 11/4/26.
+//
+
+import SwiftUI
+import UIKit // Thêm UIKit để sử dụng UIPasteboard
+
+struct CreateQRView: View {
+    @EnvironmentObject var theme: ThemeManager
+    @State private var showNoClipboardToast: Bool = false
+    
+    // 1. Thêm biến path để quản lý navigation bằng code
+    @State private var path: [CreateQRRouter] = []
+    
+    let columns = [
+        GridItem(.flexible(), spacing: 12),
+        GridItem(.flexible(), spacing: 12),
+        GridItem(.flexible()),
+    ]
+
+    var body: some View {
+        // 2. Gắn path vào NavigationStack
+        NavigationStack(path: $path) {
+            VStack {
+                NavigationLink(value: CreateQRRouter.history) {
+                    buildSection(
+                        title: "History",
+                        icon: "clock.arrow.circlepath"
+                    )
+                }.buttonStyle(.plain)
+
+                Spacer().frame(height: 12)
+                
+                // 3. Đổi NavigationLink thành Button để xử lý Validation
+                Button {
+                    checkClipboardAndNavigate()
+                } label: {
+                    buildSection(
+                        title: "Clipboard",
+                        icon: "clipboard.fill"
+                    )
+                }
+                .buttonStyle(.plain)
+
+                Spacer().frame(height: 16)
+                ScrollView {
+                    LazyVGrid(columns: columns, spacing: 12) {
+                        ForEach(CreateQREnums.allCases, id: \.self) { item in
+                            NavigationLink(
+                                value: CreateQRRouter.createDetail(item: item)
+                            ) {
+                                CreateItemCell(item: item)
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                }
+                .scrollIndicators(.hidden)
+                .padding(.horizontal, 16)
+
+            }
+            .scrollContentBackground(.hidden)
+            .marginBottom()
+            .background(Color.black)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .navigationDestination(for: CreateQRRouter.self) { router in
+                switch router {
+                case .history:
+                    HistoryView(isFavoriteOnly: false)
+                case .clipboard(let text):
+                    // 4. Truyền nội dung clipboard đã lưu vào view
+                    CreateQRBasicView(item: .text, initialContent: text)
+                case .createDetail(let item):
+                    navigationCreateQR(item: item)
+                }
+            }
+            .alert("No Clipboard Content", isPresented: $showNoClipboardToast) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text(
+                    "Your clipboard is currently empty. Please copy some text or a URL first."
+                )
+            }
+        }
+
+    }
+    
+    // MARK: - Validation Logic
+    
+    private func checkClipboardAndNavigate() {
+        if !UIPasteboard.general.hasStrings {
+            showNoClipboardToast = true
+            return
+        }
+        // Lấy dữ liệu từ Clipboard của thiết bị
+        if let text = UIPasteboard.general.string, !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            // Có dữ liệu -> Lưu lại và đẩy trang mới vào path
+            path.append(.clipboard(text: text))
+        } else {
+            // Rỗng -> Hiện Toast cảnh báo
+            showNoClipboardToast = true
+        }
+    }
+
+    // MARK: - View Builders
+
+    private func buildSection(
+        title: String,
+        icon: String,
+        subtitle: String? = nil
+    ) -> some View {
+        HStack(spacing: 16) {
+            Image(systemName: icon)
+                .font(.title2)
+                .fontWeight(.semibold)
+                .frame(width: 24, height: 24)
+                .foregroundStyle(theme.accent)
+                .scaledToFill()
+
+            VStack(alignment: .leading, spacing: 4) {
+                Text(title)
+                    .foregroundStyle(.white)
+                    .font(.title3)
+
+                if let sub = subtitle {
+                    Text(sub)
+                        .font(.headline)
+                        .foregroundStyle(.gray)
+                        .lineLimit(1)
+                }
+            }
+
+            Spacer()
+
+            Image(systemName: "chevron.right")
+                .font(.headline)
+                .frame(width: 18, height: 18)
+                .foregroundStyle(.white)
+                .scaledToFill()
+        }
+        .padding(16)
+        .background(Color.backgroundColor)
+        .clipShape(.rect(cornerRadius: 8))
+        .padding(.horizontal, 16)
+        .contentShape(Rectangle())
+    }
+
+    private func navigationCreateQR(item: CreateQREnums) -> some View {
+        //        switch item {
+        //        case .text, .location, .twitter, .instagram, .telephone:
+        //
+        //        case .sms, .whatsapp:
+        //
+        //        case .website:
+        //
+        //        case .wifi:
+        //
+        //        case .event:
+        //
+        //        case .contact:
+        //
+        //        case .business:
+        //
+        //        case .email:
+        //
+        //        }
+        return CreateQRBasicView(item: item)
+    }
+}
+
+struct CreateItemCell: View {
+    @EnvironmentObject var theme: ThemeManager
+    let item: CreateQREnums
+
+    var body: some View {
+        VStack {
+            ZStack(alignment: .top) {
+                ZStack(alignment: .center) {
+                    if let icon = item.icon() {
+                        icon.resizable()
+                            .scaledToFit()
+                            .frame(width: 28, height: 28)
+                            .foregroundStyle(theme.accent)
+                    }
+                }
+                .padding(18)
+                .frame(maxWidth: .infinity)
+                .aspectRatio(1, contentMode: .fit)
+                .background(
+                    RoundedRectangle(cornerRadius: 8).fill(Color.clear)
+                        .overlay {
+                            RoundedRectangle(cornerRadius: 8)
+                                .stroke(lineWidth: 1)
+                                .fill(theme.accent)
+                        }
+                )
+                Text(item.title())
+                    .font(.caption2)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.9)
+                    .padding(.horizontal, 4)
+                    .background(
+                        RoundedRectangle(cornerRadius: 4).fill(theme.accent)
+                    )
+                    .frame(maxWidth: 56)
+                    .alignmentGuide(.top) { dimen in
+                        dimen[VerticalAlignment.center]
+                    }
+            }
+
+            Text(item.title())
+                .foregroundStyle(.white)
+                .lineLimit(1)
+                .font(.headline)
+        }
+        .frame(maxWidth: .infinity)
+        .aspectRatio(1, contentMode: .fit)
+        .padding(.bottom, 8)
+        .padding(.top, 16)
+        .padding(.horizontal, 6)
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(Color.backgroundColor)
+        )
+    }
+}

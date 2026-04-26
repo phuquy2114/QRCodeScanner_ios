@@ -51,7 +51,7 @@ class FeedbackViewModel: BaseViewModel {
     }
 
     func submitFeedback() {
-        let request = FeedbackRequest(
+        let _ = FeedbackRequest(
             typeProblem: typeProblem.trimmingCharacters(in: .whitespaces),
             description: description.trimmingCharacters(in: .whitespaces),
             attachFiles: attachFiles,

@@ -169,23 +169,27 @@ final class ScanViewModel: BaseViewModel {
         handleDetected(payload)
         */
         
-        let request = VNDetectBarcodesRequest()
-        let handler = VNImageRequestHandler(cgImage: cgImage, options: [:])
-        // iOS 16+: perform trả về trực tiếp, không cần continuation
-        do {
-            try handler.perform([request])  // Không block main thread
-        } catch {
-            throw AppError.photoScanFailed
-        }
-
-        guard
-            let obs = request.results?.first as? VNBarcodeObservation,
-            let value = obs.payloadStringValue,
-            !value.isEmpty
-        else {
-            throw AppError.noQRCodeFound
-        }
-
+        let value: String = try await Task.detached(priority: .userInitiated) {
+            let request = VNDetectBarcodesRequest()
+            let handler = VNImageRequestHandler(cgImage: cgImage, options: [:])
+            
+            do {
+                try handler.perform([request])
+            } catch {
+                throw AppError.photoScanFailed
+            }
+            
+            guard
+                let obs = request.results?.first as? VNBarcodeObservation,
+                let payload = obs.payloadStringValue,
+                !payload.isEmpty
+            else {
+                throw AppError.noQRCodeFound
+            }
+            
+            return payload
+        }.value
+        
         handleDetected(value)
     }
 

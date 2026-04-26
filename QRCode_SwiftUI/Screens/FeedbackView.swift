@@ -82,7 +82,8 @@ struct FeedbackView: View {
         .toolbar {
             ToolbarItem(placement: .principal) {
                 Text("Feedback")
-                    .font(.system(size: 24, weight: .bold))
+                    .font(.title2)
+                    .fontWeight(.bold)
                     .foregroundStyle(.white)
             }
         }

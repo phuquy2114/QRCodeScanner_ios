@@ -1,26 +1,24 @@
 //
-//  TextInputTextEditor.swift
+//  TextThemeTextEditor.swift
 //  QRCode_SwiftUI
 //
-//  Created by Ngo Nghia on 11/4/26.
+//  Created by Ngo Nghia on 19/4/26.
 //
 
 import SwiftUI
-
-struct TextInputTextEditor: View {
+struct TextThemeTextEditor: View {
     let placeholder: String
     let maxLength: Int
-    
     @Binding var text: String
     // Biến để theo dõi trạng thái tap/focus của TextEditor
     @FocusState private var isFocused: Bool
+    @EnvironmentObject var theme: ThemeManager
     
     var body: some View {
         ZStack(alignment: .topLeading) {
             TextEditor(text: $text)
                 .focused($isFocused)
                 .padding(12)
-                .frame(height: 160)
                 .font(.title3)
                 .foregroundStyle(.white)
                 .background(Color.gray.opacity(0.2))
@@ -28,7 +26,10 @@ struct TextInputTextEditor: View {
                 .scrollContentBackground(.hidden)
                 .overlay(
                     RoundedRectangle(cornerRadius: 12)
-                        .stroke(Color.gray.opacity(0.5), lineWidth: 1)
+                        .stroke(
+                            isFocused ? theme.accent : Color.gray.opacity(0.5),
+                            lineWidth: 2
+                        )
                 )
                 // Thêm bộ đếm ký tự vào overlay góc dưới phải của chính TextEditor
                 .overlay(alignment: .bottomTrailing) {
@@ -39,19 +40,18 @@ struct TextInputTextEditor: View {
                         .padding(.trailing, 8)
                         .padding(.bottom, 2)
                 }
-                .overlay(alignment: .topLeading, content: {
-                    if !text.isEmpty || isFocused {
+                .overlay(alignment: .topLeading) {
+                    if isFocused {
                         Text(placeholder)
                         .padding(.horizontal, 3)
-                        .foregroundStyle(.white.opacity(0.7))
-                        .frame(maxWidth: 160, alignment: .leading)
+                        .foregroundStyle(theme.accent)
                         .lineLimit(1)
-                        .background(Color.backgroundColor)
-                        .font(.footnote)
+                        .background(Color.black.opacity(0.8))
+                        .font(.callout)
                         .padding(.leading, 20)
-                        .padding(.top , -8)
+                        .padding(.top , -10)
                     }
-                })
+                }
                 .padding(.horizontal, 2)
                 // Giới hạn 500 ký tự khi người dùng nhập
                 .onChange(of: text) { newValue in
@@ -74,19 +74,3 @@ struct TextInputTextEditor: View {
     }
 }
 
-#Preview {
-    // Để preview với @Binding, sử dụng @State trong một wrapper hoặc dùng .constant
-    struct PreviewWrapper: View {
-        @State private var text = ""
-        var body: some View {
-            TextInputTextEditor(
-                placeholder: "Describe your problem...",
-                maxLength: 500, text: $text
-            )
-                .padding()
-                .background(Color.black)
-        }
-    }
-    
-    return PreviewWrapper()
-}

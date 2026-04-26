@@ -43,7 +43,7 @@ struct ScanView: View {
                     // Zoom slider
                     ZoomSlider(zoom: $viewModel.zoom)
                         .padding(.horizontal, 30)
-                        .onChange(of: viewModel.zoom) { newValue in
+                        .onChange(of: viewModel.zoom) { _ in
                             viewModel.applyZoom()
                         }
 

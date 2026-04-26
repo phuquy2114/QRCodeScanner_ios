@@ -7,6 +7,7 @@
 
 import Foundation
 import SwiftUI
+
 enum AppTab: String, CaseIterable {
     case scan, history, create, favorite, settings
 

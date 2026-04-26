@@ -33,7 +33,6 @@ class BaseViewModel: ObservableObject {
     }
 
     // MARK: - Loading
-
     /// Bọc một async task, tự set isLoading và bắt lỗi
     func run(_ task: () async throws -> Void) async {
         isLoading = true

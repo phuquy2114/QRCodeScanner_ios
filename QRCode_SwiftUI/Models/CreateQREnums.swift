@@ -1,5 +1,5 @@
 //
-//  CreateQR.swift
+//  CreateQREnums.swift
 //  QRCode_SwiftUI
 //
 //  Created by Ngo Nghia on 18/4/26.
@@ -8,7 +8,7 @@
 import Foundation
 import SwiftUI
 
-enum CreateQR: String, CaseIterable, Codable {
+enum CreateQREnums: String, CaseIterable, Codable, Hashable {
     case text, website, wifi, event, contact, business, location, sms, whatsapp, email,
     twitter, instagram, telephone
     

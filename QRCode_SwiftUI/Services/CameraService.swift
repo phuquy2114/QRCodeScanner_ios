@@ -84,7 +84,9 @@ actor CameraService {
     // AVCaptureSession.startRunning / stopRunning KHÔNG phải @MainActor.
     func start() {
         guard !session.isRunning else { return }
-        session.startRunning()
+        Task.detached(priority: .userInitiated) {
+            self.session.startRunning()
+        }
     }
 
     func stop() {

@@ -7,11 +7,9 @@
 
 import SwiftUI
 
-// Định nghĩa các trạng thái của App
 enum AppState {
     case splash
     case main
-    // Sau này có thể thêm: case login, case onboarding...
 }
 
 struct RootView: View {
