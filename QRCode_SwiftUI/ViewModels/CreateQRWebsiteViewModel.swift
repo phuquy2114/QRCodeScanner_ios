@@ -18,7 +18,7 @@ class CreateQRWebsiteViewModel: BaseCreateQRViewModel {
     override func handleCreateQR() {
         // Validation: Đảm bảo URL không bị bỏ trống
         let rules: [ValidationRule] = [
-            .nonEmpty(url, fieldName: "Website URL")
+            .nonEmpty(url, fieldName: "URL Link")
         ]
 
         guard validate(rules) else { return }

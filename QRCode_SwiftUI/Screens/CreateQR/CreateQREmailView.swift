@@ -41,8 +41,8 @@ struct CreateQREmailView: View {
             // 3. Nhập nội dung
             TextThemeTextEditor(
                 placeholder: "Compose email...",
-                maxLength: 500,
-                annotation: "Message",
+                maxLength: viewModel.maxLength,
+                annotation: "Content",
                 text: $viewModel.content
             ).frame(height: 160)
         }

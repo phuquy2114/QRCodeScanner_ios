@@ -75,7 +75,7 @@ struct HistoryView: View {
         
         let icon = isFavoriteOnly ? "heart.slash" : "doc.text.magnifyingglass"
         let title = isFavoriteOnly ? "No favorites yet." : "No history yet."
-        let content = isFavoriteOnly ? "On the history screen, tap the star icon to view the data there." : "Create your first QR code to get the data on this screen"
+        let content = isFavoriteOnly ? "On the history screen, tap the star icon to view the data there." : "Create your first QR code to get the data on this screen."
         
         return (icon, title, content)
     }

@@ -1,8 +1,22 @@
+//
+//  BaseLayoutDetailView.swift
+//  QRCode_SwiftUI
+//
+//  Created by Ngo Nghia
+//
+
 import SwiftUI
 
-struct BasicDetailView: View {
-    @EnvironmentObject var theme: ThemeManager
+struct BaseLayoutDetailView<Content: View>: View {
+//    @EnvironmentObject var theme: ThemeManager
     @ObservedObject var entity: QRCodeEntity
+
+    // Tiêu đề hiển thị trên Header (Toolbar)
+    var title: String
+
+    // Nội dung tuỳ biến ở giữa
+    @ViewBuilder var content: () -> Content
+
     @State private var uiImage: UIImage?
     @State private var showShareSheet: Bool = false
     @State private var showToast: Bool = false
@@ -10,7 +24,7 @@ struct BasicDetailView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 24) {
-                // Text Box
+                
                 Text(entity.rawContent ?? "")
                     .font(.title3)
                     .fontWeight(.semibold)
@@ -19,50 +33,27 @@ struct BasicDetailView: View {
                     .padding(16)
                     .background(Color.gray.opacity(0.25))
                     .clipShape(RoundedRectangle(cornerRadius: 16))
+                
+                // 1. PHẦN NỘI DUNG RIÊNG (BODY)
+                content()
 
-                // Buttons
-                VStack(spacing: 12) {
-                    Button {
+                // 2. PHẦN FOOTER: 2 NÚT BẤM
+                HStack(spacing: 16) {
+                    buildButton(title: "COPY", color: .white) {
                         UIPasteboard.general.string = entity.rawContent
                         withAnimation {
                             showToast = true
                         }
-
-                    } label: {
-                        Text("COPY")
-                            .font(.headline)
-                            .foregroundStyle(theme.accent)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 16)
-                            .background(Color.clear)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 12)
-                                    .stroke(theme.accent, lineWidth: 1)
-                            )
                     }
 
-                    Button {
+                    buildButton(title: "SHARE", color: .white) {
                         if uiImage != nil {
                             showShareSheet = true
                         }
-                    } label: {
-                        Text("SHARE")
-                            .font(.headline)
-                            .foregroundStyle(.white)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 16)
-                            .background(Color.clear)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 12)
-                                    .stroke(
-                                        Color.white,
-                                        lineWidth: 1
-                                    )
-                            )
                     }
                 }
 
-                // QR Image
+                // 3. PHẦN FOOTER: ẢNH QR & TEXT
                 if let img = uiImage {
                     Image(uiImage: img)
                         .resizable()
@@ -72,38 +63,30 @@ struct BasicDetailView: View {
                         .background(Color.white)
                 }
 
-                Spacer().frame(height: 24)
-
                 Text("Feedback or suggestion")
                     .font(.callout)
                     .foregroundStyle(.gray)
-
-                Spacer()
             }
             .padding(20)
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .scrollIndicators(.hidden)
+        .marginBottom()
         .background(Color.black)
         .navigationBarTitleDisplayMode(.inline)
+        // HEADER: TITLE
         .toolbar {
             ToolbarItem(placement: .principal) {
-                Text(entity.rawContent ?? "")
+                Text(title)
                     .font(.title2)
+                    .fontWeight(.semibold)
                     .foregroundStyle(.white)
                     .lineLimit(1)
             }
         }
+        // XỬ LÝ LOGIC DÙNG CHUNG
         .onAppear {
-            if let fileName = entity.imageFileName,
-               let rawImage = LocalImageService.shared.loadImage(fileName: fileName) {
-                
-                // Gọi extension dùng chung, code cực kỳ gọn gàng
-                Task.detached(priority: .userInitiated) {
-                    let cleanedImage = await rawImage.removingAlphaChannel()
-                    await MainActor.run {
-                        self.uiImage = cleanedImage
-                    }
-                }
-            }
+            loadQRImage()
         }
         .sheet(isPresented: $showShareSheet) {
             if let imageToShare = uiImage {
@@ -112,6 +95,40 @@ struct BasicDetailView: View {
                     .presentationDragIndicator(.visible)
             }
         }
-        .toast(isShowing: $showToast, message: "copied")
+        .toast(isShowing: $showToast, message: "Copied")
+    }
+
+    // MARK: - Helpers
+    private func buildButton(
+        title: String,
+        color: Color,
+        onTap: @escaping () -> Void
+    ) -> some View {
+        Button(action: onTap) {
+            Text(title)
+                .font(.title3)
+                .fontWeight(.semibold)
+                .foregroundStyle(color)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 16)
+                .background(Color.clear)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(color, lineWidth: 2)
+                )
+        }
+    }
+
+    private func loadQRImage() {
+        guard let fileName = entity.imageFileName,
+            let image = LocalImageService.shared.loadImage(fileName: fileName)
+        else { return }
+
+        Task.detached(priority: .userInitiated) {
+            let cleanedImage = await image.removingAlphaChannel()
+            await MainActor.run {
+                self.uiImage = cleanedImage
+            }
+        }
     }
 }

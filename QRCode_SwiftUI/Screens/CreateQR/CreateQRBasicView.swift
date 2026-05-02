@@ -125,9 +125,9 @@ struct CreateQRBasicView: View {
     var body: some View {
         BaseLayoutCreateQRView(item: item, viewModel: viewModel) {
             TextThemeTextEditor(
-                placeholder: "URL or content",
+                placeholder: "Content",
                 maxLength: viewModel.maxLength,
-                annotation: "URL or content",
+                annotation: "Content",
                 text: $viewModel.content
             ).frame(minHeight: 160)
         }
