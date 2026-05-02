@@ -6,7 +6,7 @@
 //
 
 import SwiftUI
-
+/*
 struct CreateQRBasicView: View {
     let item: CreateQREnums
     var initialContent: String = ""
@@ -25,8 +25,7 @@ struct CreateQRBasicView: View {
                     placeholder: "URL or content",
                     maxLength: viewModel.maxLength,
                     text: $viewModel.content
-                )
-                .frame(minHeight: 80)
+                ).frame(minHeight: 160)
 
                 Spacer().frame(height: 36)
 
@@ -63,14 +62,14 @@ struct CreateQRBasicView: View {
                     Spacer().frame(height: 24)
                     
                     HStack(spacing: 12) {
-                        ButtonTheme(title: "SAVE IMAGE", radius: 6) {
+                        ButtonTheme(title: "SAVE IMAGE", radius: 8) {
                             let success = viewModel.saveQRToDatabase(type: item)
                             if success {
                                 showSaveAlert = true
                             }
                         }
                         
-                        ButtonTheme(title: "SHARE IMAGE", radius: 6) {
+                        ButtonTheme(title: "SHARE IMAGE", radius: 8) {
                             showShareSheet = true
                         }
                     }
@@ -108,6 +107,29 @@ struct CreateQRBasicView: View {
                     .presentationDetents([.medium, .large])
                     .presentationDragIndicator(.visible)
             }
+        }
+        .onAppear {
+            if !initialContent.isEmpty && viewModel.content.isEmpty {
+                viewModel.content = initialContent
+            }
+        }
+    }
+}
+*/
+
+struct CreateQRBasicView: View {
+    let item: CreateQREnums
+    var initialContent: String = ""
+    @StateObject private var viewModel = CreateQRBasicViewModel()
+    
+    var body: some View {
+        BaseLayoutCreateQRView(item: item, viewModel: viewModel) {
+            TextThemeTextEditor(
+                placeholder: "URL or content",
+                maxLength: viewModel.maxLength,
+                annotation: "URL or content",
+                text: $viewModel.content
+            ).frame(minHeight: 160)
         }
         .onAppear {
             if !initialContent.isEmpty && viewModel.content.isEmpty {

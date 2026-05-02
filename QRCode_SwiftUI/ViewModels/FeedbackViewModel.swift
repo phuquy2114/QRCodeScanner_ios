@@ -23,7 +23,7 @@ class FeedbackViewModel: BaseViewModel {
         ),
         ProblemItem(title: "other", isSelected: false),
     ]
-    
+
     @Published var typeProblem: String = ""
     @Published var description: String = ""
     @Published var isFormValid: Bool = false
@@ -35,7 +35,8 @@ class FeedbackViewModel: BaseViewModel {
         Publishers.CombineLatest($typeProblem, $description)
             .dropFirst()
             .map { title, description in
-                return !title.trimmingCharacters(in: .whitespaces).isEmpty && !description.trimmingCharacters(in: .whitespaces).isEmpty
+                return !title.trimmingCharacters(in: .whitespaces).isEmpty
+                    && !description.trimmingCharacters(in: .whitespaces).isEmpty
             }
             .receive(on: RunLoop.main)
             .assign(to: \.isFormValid, on: self)
@@ -57,17 +58,16 @@ class FeedbackViewModel: BaseViewModel {
             attachFiles: attachFiles,
             time: Date.now
         )
-        
-//        Task {
-//            await run {
-//                let result: FeedbackResponse = try await NetworkService.shared
-//                    .upload(FeedbackEndpoint.submitFeedback, items: attachFiles)
-//                
-//            }
-//
-//        }
+
+        //        Task {
+        //            await run {
+        //                let result: FeedbackResponse = try await NetworkService.shared
+        //                    .upload(FeedbackEndpoint.submitFeedback, items: attachFiles)
+        //
+        //            }
+        //
+        //        }
 
     }
 
 }
-

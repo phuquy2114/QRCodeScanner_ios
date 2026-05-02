@@ -24,6 +24,10 @@ enum AppError: LocalizedError, Equatable {
     case networkUnavailable
     case serverError(code: Int)
 
+    // VALIDATION value
+    case emptyValue(message: String)
+    case invalidFormat(message: String) // <--- THÊM CASE NÀY Ở ĐÂY
+    
     // Generic
     case unknown(String)
 
@@ -39,6 +43,8 @@ enum AppError: LocalizedError, Equatable {
         case .photoScanFailed: return "Failed to scan image"
         case .networkUnavailable: return "No internet connection"
         case .serverError(let c): return "Server error (\(c))"
+        case .emptyValue: return "Missing Input" // Đổi tên hiển thị cho hợp lý
+        case .invalidFormat: return "Invalid Format" // <--- THÊM HIỂN THỊ TITLE Ở ĐÂY
         case .unknown(let msg):
             return msg.isEmpty ? "Something went wrong" : msg
         }
@@ -56,6 +62,8 @@ enum AppError: LocalizedError, Equatable {
         case .photoScanFailed: return "Try again with a clearer image"
         case .networkUnavailable: return "Check your connection and try again"
         case .serverError: return "Please try again later"
+        case .emptyValue(let message): return message
+        case .invalidFormat(let message): return message // <--- THÊM HIỂN THỊ LỜI KHUYÊN Ở ĐÂY
         case .unknown: return "Please try again"
         }
     }
@@ -67,7 +75,7 @@ enum AppError: LocalizedError, Equatable {
         case .photoLoadFailed, .photoScanFailed: return "photo.fill"
         case .networkUnavailable: return "wifi.slash"
         case .serverError: return "exclamationmark.icloud.fill"
-        case .unknown: return "exclamationmark.triangle.fill"
+        case .unknown, .emptyValue, .invalidFormat: return "exclamationmark.triangle.fill" // <--- THÊM ICON Ở ĐÂY
         }
     }
 

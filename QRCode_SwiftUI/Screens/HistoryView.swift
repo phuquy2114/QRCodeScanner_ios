@@ -28,7 +28,6 @@ struct HistoryView: View {
 
     var body: some View {
         ZStack {
-
             if items.isEmpty {
                 let data = getDefaultData()
                 PlaceholderView(

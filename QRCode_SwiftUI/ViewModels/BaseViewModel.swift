@@ -1,3 +1,4 @@
+import Combine
 //
 //  BaseViewModel.swift
 //  QRCode_SwiftUI
@@ -6,7 +7,6 @@
 //
 import SwiftUI
 import UIKit
-import Combine
 
 @MainActor
 class BaseViewModel: ObservableObject {
@@ -44,5 +44,20 @@ class BaseViewModel: ObservableObject {
         } catch {
             presentError(.unknown(error.localizedDescription))
         }
+    }
+}
+
+// MARK: - Validation Helpers
+extension BaseViewModel {
+    /// Validate và trả về lỗi nếu có
+    @discardableResult
+    func validate(_ rules: [ValidationRule]) -> Bool {
+        for rule in rules {
+            if let error = rule.validate() {
+                presentError(error)
+                return false
+            }
+        }
+        return true
     }
 }

@@ -75,7 +75,7 @@ struct HistoryCellView: View {
         .padding(.horizontal, 20)
         .padding(.top, 22)
         .padding(.bottom, 16)
-        .background(Color.gray.opacity(0.15))
+        .background(Color.gray.opacity(0.2))
         .clipShape(RoundedRectangle(cornerRadius: 16))
     }
     

@@ -11,17 +11,20 @@ struct FeedbackView: View {
 
     @EnvironmentObject var theme: ThemeManager
     @StateObject private var viewModel = FeedbackViewModel()
-        
+
     var body: some View {
         ScrollView {
             Spacer().frame(height: 10)
+
             Text("What problems did you encounter?")
                 .font(.title2)
                 .fontWeight(.semibold)
                 .foregroundStyle(.white)
+
             Spacer().frame(height: 20)
+
             LazyVStack(alignment: .leading, spacing: 12) {
-                ForEach(viewModel.problemItems.indices,  id: \.self) { index in
+                ForEach(viewModel.problemItems.indices, id: \.self) { index in
                     Button {
                         viewModel.onTapItemProblem(index: index)
                     } label: {
@@ -31,42 +34,56 @@ struct FeedbackView: View {
                     .padding(12)
                     .foregroundStyle(
                         // Xoá dấu $ ở đây đi vì chúng ta chỉ đọc (Read) chứ không truyền tham chiếu
-                        viewModel.problemItems[index].isSelected ? .blue : .white
+                        viewModel.problemItems[index].isSelected
+                            ? .blue : .white
                     )
-                    .clipShape(.rect(cornerRadius:16))
+                    .clipShape(.rect(cornerRadius: 16))
                     .overlay {
                         RoundedRectangle(cornerRadius: 16)
                             .stroke(
                                 viewModel
-                                    .problemItems[index].isSelected ? .blue : .white,
+                                    .problemItems[index].isSelected
+                                    ? .blue : .white,
                                 lineWidth: 1
                             )
                     }
                 }
             }
             .listRowBackground(Color.clear)
-            .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
+            .listRowInsets(
+                EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0)
+            )
             .padding(.leading, 2)
-            
-            Spacer().frame(height: 20)
-            TextInputTextEditor(
+
+            Spacer().frame(height: 26)
+
+            Spacer().frame(height: 8)
+
+            TextThemeTextEditor(
                 placeholder: "Describe your problem...",
                 maxLength: viewModel.maxDescriptionLength,
+                annotation: "Describe your problem",
                 text: $viewModel.description
             )
-            Spacer().frame(height: 20)
+            .frame(height: 160)
+
+            Spacer().frame(height: 26)
+
             Text("Attach images (maximum \(self.viewModel.maxImages) images)")
                 .font(.body)
                 .foregroundStyle(.white)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.leading, 4)
-            
+
             Spacer().frame(height: 8)
+
             ImageSection(
                 listImage: $viewModel.attachFiles,
                 maxImages: viewModel.maxImages
             )
+
             Spacer().frame(height: 30)
+
             ButtonTheme(title: "SUBMIT") {
                 viewModel.submitFeedback()
             }

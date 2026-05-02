@@ -29,16 +29,18 @@ struct PlaceholderView: View {
                 Text(title)
                 .font(.title2)
                 .foregroundStyle(.white)
+                .fontWeight(.semibold)
                 
                 if let content = content {
+                    Spacer().frame(height: 12)
                     Text(content)
-                        .font(.headline)
+                        .font(.title3)
                         .multilineTextAlignment(.center)
-                        .padding(.horizontal, 16)
+                        .padding(.horizontal, 32)
                         .foregroundStyle(.white)
                 }
 
-                Spacer().frame(height: 30)
+                Spacer().frame(height: 8)
                 
                 Spacer().frame(height: geo.size.height / 2)
 

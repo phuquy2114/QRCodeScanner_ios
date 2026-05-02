@@ -133,7 +133,7 @@ final class ScanViewModel: BaseViewModel {
     }
 
     private func scanFromPickedPhoto() async throws {
-       
+
         guard
             let item = selectedPhotoItem,
             let data = try? await item.loadTransferable(type: Data.self),
@@ -141,7 +141,7 @@ final class ScanViewModel: BaseViewModel {
         else {
             throw AppError.photoLoadFailed
         }
-        
+
         /*
         // Vision synchronous + CPU heavy → global queue tránh block
         let payload: String = try await withCheckedThrowingContinuation {
@@ -168,17 +168,17 @@ final class ScanViewModel: BaseViewModel {
         }
         handleDetected(payload)
         */
-        
+
         let value: String = try await Task.detached(priority: .userInitiated) {
             let request = VNDetectBarcodesRequest()
             let handler = VNImageRequestHandler(cgImage: cgImage, options: [:])
-            
+
             do {
                 try handler.perform([request])
             } catch {
                 throw AppError.photoScanFailed
             }
-            
+
             guard
                 let obs = request.results?.first as? VNBarcodeObservation,
                 let payload = obs.payloadStringValue,
@@ -186,10 +186,10 @@ final class ScanViewModel: BaseViewModel {
             else {
                 throw AppError.noQRCodeFound
             }
-            
+
             return payload
         }.value
-        
+
         handleDetected(value)
     }
 

@@ -15,8 +15,9 @@ class SettingsViewModel: BaseViewModel {
     @Environment(\.openURL) private var openURL
     let appVersion = "1.3.2"
     let appLink = "https://sites.google.com/view/uits-qrbarcodescanner/home"
-    let appPrivacyPolicy = "https://sites.google.com/view/uits-qrbarcodescanner/home"
-    
+    let appPrivacyPolicy =
+        "https://sites.google.com/view/uits-qrbarcodescanner/home"
+
     override init() {
         super.init()
     }

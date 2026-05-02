@@ -46,7 +46,7 @@ extension View {
     }
     
     func marginBottom() -> some View {
-        self.padding(.bottom, 90)
+        self.padding(.bottom, 95)
     }
 }
 

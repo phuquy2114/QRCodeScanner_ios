@@ -8,6 +8,23 @@
 import SwiftUI
 import LinkPresentation
 
+struct ShareSheet: UIViewControllerRepresentable {
+    let items: [Any]
+
+    func makeUIViewController(context: Context) -> UIActivityViewController {
+        // Tự động map các ảnh sang ImageActivityItemSource để hỗ trợ Preview Icon
+        let activityItems = items.map { item -> Any in
+            if let image = item as? UIImage {
+                return ImageActivityItemSource(image: image)
+            }
+            return item
+        }
+        return UIActivityViewController(activityItems: activityItems, applicationActivities: nil)
+    }
+
+    func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {}
+}
+
 class ImageActivityItemSource: NSObject, UIActivityItemSource {
     let image: UIImage
     let title: String
@@ -32,21 +49,4 @@ class ImageActivityItemSource: NSObject, UIActivityItemSource {
         metadata.imageProvider = NSItemProvider(object: image)
         return metadata
     }
-}
-
-struct ShareSheet: UIViewControllerRepresentable {
-    let items: [Any]
-
-    func makeUIViewController(context: Context) -> UIActivityViewController {
-        // Tự động map các ảnh sang ImageActivityItemSource để hỗ trợ Preview Icon
-        let activityItems = items.map { item -> Any in
-            if let image = item as? UIImage {
-                return ImageActivityItemSource(image: image)
-            }
-            return item
-        }
-        return UIActivityViewController(activityItems: activityItems, applicationActivities: nil)
-    }
-
-    func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {}
 }

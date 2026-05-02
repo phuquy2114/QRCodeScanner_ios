@@ -11,6 +11,7 @@ import UIKit // Thêm UIKit để sử dụng UIPasteboard
 struct CreateQRView: View {
     @EnvironmentObject var theme: ThemeManager
     @State private var showNoClipboardToast: Bool = false
+    @State private var showPermissionAlert: Bool = false // <--- Biến mới để xin quyền
     
     // 1. Thêm biến path để quản lý navigation bằng code
     @State private var path: [CreateQRRouter] = []
@@ -77,6 +78,7 @@ struct CreateQRView: View {
                     navigationCreateQR(item: item)
                 }
             }
+            // Thông báo bộ nhớ trống
             .alert("No Clipboard Content", isPresented: $showNoClipboardToast) {
                 Button("OK", role: .cancel) {}
             } message: {
@@ -84,24 +86,43 @@ struct CreateQRView: View {
                     "Your clipboard is currently empty. Please copy some text or a URL first."
                 )
             }
+            // THÔNG BÁO XIN QUYỀN CLIPBOARD TỪ SETTINGS
+            .alert("Permission Required", isPresented: $showPermissionAlert) {
+                Button("Cancel", role: .cancel) {}
+                Button("Open Settings") {
+                    if let url = URL(string: UIApplication.openSettingsURLString) {
+                        UIApplication.shared.open(url)
+                    }
+                }
+            } message: {
+                Text(
+                    "Please tap 'Open Settings' and change 'Paste from Other Apps' to 'Allow' to use this feature seamlessly."
+                )
+            }
         }
 
     }
     
     // MARK: - Validation Logic
-    
     private func checkClipboardAndNavigate() {
+        // Kiểm tra xem Clipboard có chứa định dạng chữ hay không (Hàm này KHÔNG gọi popup của Apple)
         if !UIPasteboard.general.hasStrings {
             showNoClipboardToast = true
             return
         }
-        // Lấy dữ liệu từ Clipboard của thiết bị
-        if let text = UIPasteboard.general.string, !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-            // Có dữ liệu -> Lưu lại và đẩy trang mới vào path
-            path.append(.clipboard(text: text))
+        
+        // Cố gắng đọc chữ từ Clipboard (Hàm này SẼ kích hoạt popup của Apple)
+        if let text = UIPasteboard.general.string {
+            if !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                // Đọc thành công -> Đi tiếp
+                path.append(.clipboard(text: text))
+            } else {
+                showNoClipboardToast = true
+            }
         } else {
-            // Rỗng -> Hiện Toast cảnh báo
-            showNoClipboardToast = true
+            // Có dữ liệu chữ, nhưng không đọc được (trả về nil)
+            // -> Chắc chắn 100% người dùng đã bấm "Don't Allow" hoặc đang tắt quyền trong Settings
+            showPermissionAlert = true
         }
     }
 
@@ -148,26 +169,28 @@ struct CreateQRView: View {
         .contentShape(Rectangle())
     }
 
+    @ViewBuilder
     private func navigationCreateQR(item: CreateQREnums) -> some View {
-        //        switch item {
-        //        case .text, .location, .twitter, .instagram, .telephone:
-        //
-        //        case .sms, .whatsapp:
-        //
-        //        case .website:
-        //
-        //        case .wifi:
-        //
-        //        case .event:
-        //
-        //        case .contact:
-        //
-        //        case .business:
-        //
-        //        case .email:
-        //
-        //        }
-        return CreateQRBasicView(item: item)
+        switch item {
+        case .text, .location, .twitter, .instagram:
+            CreateQRBasicView(item: item)
+        case .telephone:
+            CreateQRTelephoneView(item: item)
+        case .sms, .whatsapp:
+            CreateQRSMSView(item: item)
+        case .website:
+            CreateQRWebsiteView(item: item)
+        case .wifi:
+            CreateQRWifiView(item: item)
+        case .event:
+            CreateQREventView(item: item)
+        case .contact:
+            CreateQRContactView(item: item)
+        case .business:
+            CreateQRBusinessView(item: item)
+        case .email:
+            CreateQREmailView(item: item)
+        }
     }
 }
 

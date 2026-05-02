@@ -13,11 +13,14 @@ struct TabContent: View {
     var body: some View {
         switch selectedTab {
         case .scan: ScanView()
-        case .history: NavigationStack { HistoryView(isFavoriteOnly: false) }
+        case .history: getHistoryView(isFavorite: false)
         case .create: CreateQRView()
-        case .favorite: NavigationStack { HistoryView(isFavoriteOnly: true) }
+        case .favorite: getHistoryView(isFavorite: true)
         case .settings: SettingsView()
         }
     }
-}
 
+    private func getHistoryView(isFavorite: Bool) -> some View {
+        NavigationStack { HistoryView(isFavoriteOnly: isFavorite) }
+    }
+}

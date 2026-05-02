@@ -18,7 +18,7 @@ struct ToastModifier: ViewModifier {
                 VStack {
                     Spacer()
                     ToastView(message: message)
-                        .padding(.bottom, 100) // Khoảng cách từ đáy màn hình
+                        .padding(.bottom, 90) // Khoảng cách từ đáy màn hình
                 }
                 .onAppear {
                     // Tự động ẩn sau 2 giây
